@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="config.js"></script>
+    <script src="config.js" defer></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         
@@ -1019,54 +1019,43 @@
         function removeTypingIndicator() { const indicator = document.getElementById('typing-indicator-wrapper'); if (indicator) indicator.remove(); }
 
         // General Chat Query using SDK
-        async function handleAISubmit(e) {
-            e.preventDefault(); 
-            const inputEl = document.getElementById('ai-input'); 
-            const submitBtn = document.getElementById('ai-submit-btn');
-            const prompt = inputEl.value.trim(); 
-            
-            if (!prompt) return;
-            
-            inputEl.value = ''; 
-            inputEl.disabled = true; 
-            submitBtn.disabled = true;
-            
-            appendMessage('user', prompt); 
-            showTypingIndicator();
+       async function handleAISubmit(e) {
+    e.preventDefault();
+    const inputEl = document.getElementById('ai-input');
+    const prompt = inputEl.value.trim();
+    if (!prompt) return;
 
-            const contextMsg = `The user is studying the "${tabLabels[state.activeTab]}" section.`;
+    // Show user message and clear input
+    inputEl.value = '';
+    appendMessage('user', prompt);
+    showTypingIndicator();
 
-            try {
-                // Dynamically import the Google Gen AI SDK
-                const { GoogleGenAI } = await import('https://esm.run/@google/genai');
-                const ai = new GoogleGenAI({ apiKey: apiKey });
+    try {
+        // Call your new secure Vercel API
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                prompt: prompt, 
+                // Passing the current tab context if you have it
+                context: typeof state !== 'undefined' && state.activeTab ? `The user is studying ${state.activeTab}` : "You are an expert Data Structures tutor."
+            })
+        });
 
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: prompt,
-                    config: {
-                        systemInstruction: "You are an expert Data Structures tutor. Keep answers concise. Use Markdown. " + contextMsg
-                    }
-                });
+        if (!response.ok) throw new Error("API request failed");
 
-                removeTypingIndicator();
-                
-                if (response.text) {
-                    appendMessage('ai', marked.parse(response.text), true); 
-                } else {
-                    appendMessage('ai', "I'm sorry, I couldn't generate a response.");
-                }
-                
-            } catch (error) {
-                removeTypingIndicator(); 
-                console.error("GenAI SDK Error:", error);
-                appendMessage('ai', "API Error. Please check your API key or ensure you are running on a local server.");
-            } finally { 
-                inputEl.disabled = false; 
-                submitBtn.disabled = false; 
-                inputEl.focus(); 
-            }
-        }
+        const data = await response.json();
+        removeTypingIndicator();
+        
+        // Extract and format the response
+        const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        appendMessage('ai', typeof marked !== 'undefined' ? marked.parse(responseText || "No response") : (responseText || "No response"), true);
+    } catch (error) {
+        console.error("AI Error:", error);
+        removeTypingIndicator();
+        appendMessage('ai', "Error connecting to tutor. Please check if the Vercel Serverless Function is working.");
+    }
+}
 
         // Graph Generator using SDK JSON Schema
         async function generateGraphWithAI() {
