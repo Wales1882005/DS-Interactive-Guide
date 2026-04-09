@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
+    <script src="config.js"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
         
@@ -967,9 +967,7 @@
             renderGraphSection(); renderTreeSection(); renderTraversalCanvas(); renderSpanningCanvas(); renderExprCanvas(); initCharts();
         }
 
-        // --- GEMINI AI INTEGRATION (Using @google/genai SDK) ---
-        const apiKey = "AIzaSyAY5afFppoDQfjqyr6859ihRKG6gjjcnDk"; // IMPORTANT: Insert your generated AIzaSy... key here!
-        
+       
         const aiContexts = {
             'foundations': ["Explain Arrays vs Linked Lists ✨", "What is Big O notation? ✨"],
             'linear': ["Write a Stack class in Python ✨", "Give a real world queue example ✨"],
