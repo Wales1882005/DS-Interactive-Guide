@@ -1,10 +1,10 @@
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   const { prompt, context } = req.body;
   const apiKey = process.env.GEMINI_API_KEY;
 
-  // 1. Check if Vercel even sees the key
+  // 1. Check if Vercel sees the key
   if (!apiKey) {
-    return res.status(500).json({ error: "Missing API Key in Vercel settings. Did you redeploy?" });
+    return res.status(500).json({ error: "Missing API Key in Vercel settings." });
   }
 
   try {
@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // 2. If Google rejects the key, pass the exact error back to the website
+    // 2. If Google rejects the key, pass the exact error back
     if (!response.ok) {
       return res.status(response.status).json(data);
     }
@@ -29,4 +29,4 @@ export default async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: "Failed to connect to Google servers" });
   }
-}
+};
