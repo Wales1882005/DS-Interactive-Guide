@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Structures & Algorithms: Complete Interactive Guide</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fafaf9;
+            color: #292524;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 40vh;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .node-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .ds-box {
+            transition: all 0.2s ease;
+        }
+        .ds-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden antialiased selection:bg-teal-200 selection:text-teal-900">
+
+    <aside class="w-64 bg-white border-r border-stone-200 flex flex-col hidden md:flex z-20 shadow-sm">
+        <div class="h-16 flex items-center px-6 border-b border-stone-200 shrink-0">
+            <span class="text-2xl text-teal-600 mr-2">&#9635;</span>
+            <span class="font-bold text-lg tracking-tight">DS<span class="text-teal-600">Mastery</span></span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-3" id="nav-menu">
+            <button onclick="switchTab('foundations')" id="btn-foundations" class="flex items-center text-left px-3 py-2 rounded-md text-sm font-medium bg-teal-50 text-teal-700 transition-colors">1. Foundations & Arrays</button>
+            <button onclick="switchTab('linear')" id="btn-linear" class="flex items-center text-left px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors">2. Stacks & Queues</button>
+            <button onclick="switchTab('nonlinear')" id="btn-nonlinear" class="flex items-center text-left px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors">3. Graphs & Trees</button>
+            <button onclick="switchTab('parsing')" id="btn-parsing" class="flex items-center text-left px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors">4. Expression Parsing</button>
+            <button onclick="switchTab('searching')" id="btn-searching" class="flex items-center text-left px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors">5. Search Algorithms</button>
+            <button onclick="switchTab('practice')" id="btn-practice" class="flex items-center text-left px-3 py-2 rounded-md text-sm font-medium text-stone-600 hover:bg-stone-50 transition-colors">6. Practice & Exams</button>
+        </nav>
+    </aside>
+
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+        <header class="md:hidden h-16 bg-white border-b border-stone-200 flex items-center justify-between px-4 shrink-0 shadow-sm">
+            <span class="font-bold text-lg tracking-tight">DS<span class="text-teal-600">Mastery</span></span>
+            <select onchange="switchTab(this.value)" class="bg-stone-100 border-stone-200 text-sm rounded-md p-2 outline-none">
+                <option value="foundations">Foundations & Arrays</option>
+                <option value="linear">Stacks & Queues</option>
+                <option value="nonlinear">Graphs & Trees</option>
+                <option value="parsing">Expression Parsing</option>
+                <option value="searching">Search Algorithms</option>
+                <option value="practice">Practice & Exams</option>
+            </select>
+        </header>
+
+        <main class="flex-1 overflow-y-auto p-4 sm:p-8 bg-stone-50" id="main-content">
+
+            <div id="view-foundations" class="fade-in block max-w-5xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-3 tracking-tight">Data Structure Foundations</h1>
+                    <p class="text-lg text-stone-600">This section introduces the core concepts of data organization and algorithms. A data structure is a way of collecting and organizing data to perform operations effectively. Algorithms are the finite sets of instructions used to manipulate them.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h2 class="text-xl font-bold text-stone-800 mb-4 border-b border-stone-100 pb-2">Algorithm Properties</h2>
+                        <ul class="space-y-3 text-sm text-stone-600">
+                            <li class="flex items-start"><span class="text-teal-600 mr-2">&#10003;</span><strong>Input:</strong> 0 or more inputs supplied externally.</li>
+                            <li class="flex items-start"><span class="text-teal-600 mr-2">&#10003;</span><strong>Output:</strong> At least 1 output obtained.</li>
+                            <li class="flex items-start"><span class="text-teal-600 mr-2">&#10003;</span><strong>Definiteness:</strong> Every step must be clear and well-defined.</li>
+                            <li class="flex items-start"><span class="text-teal-600 mr-2">&#10003;</span><strong>Finiteness:</strong> Must have a finite number of steps.</li>
+                            <li class="flex items-start"><span class="text-teal-600 mr-2">&#10003;</span><strong>Correctness:</strong> Must generate a correct output.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h2 class="text-xl font-bold text-stone-800 mb-4 border-b border-stone-100 pb-2">Data Types</h2>
+                        <div class="space-y-4">
+                            <div>
+                                <h3 class="font-semibold text-stone-800 text-sm">Primitive</h3>
+                                <p class="text-xs text-stone-500 mb-2">Directly operated upon by machine instructions.</p>
+                                <div class="flex gap-2 flex-wrap">
+                                    <span class="px-2 py-1 bg-stone-100 border border-stone-200 rounded text-xs">Integer</span>
+                                    <span class="px-2 py-1 bg-stone-100 border border-stone-200 rounded text-xs">Float</span>
+                                    <span class="px-2 py-1 bg-stone-100 border border-stone-200 rounded text-xs">Character</span>
+                                    <span class="px-2 py-1 bg-stone-100 border border-stone-200 rounded text-xs">Pointer</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-stone-800 text-sm">Non-Primitive</h3>
+                                <p class="text-xs text-stone-500 mb-2">Derived from primitives; structures group of items.</p>
+                                <div class="flex gap-2 flex-wrap">
+                                    <span class="px-2 py-1 bg-teal-50 border border-teal-200 text-teal-800 rounded text-xs">Array</span>
+                                    <span class="px-2 py-1 bg-teal-50 border border-teal-200 text-teal-800 rounded text-xs">Linked List</span>
+                                    <span class="px-2 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded text-xs">Tree</span>
+                                    <span class="px-2 py-1 bg-amber-50 border border-amber-200 text-amber-800 rounded text-xs">Graph</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm mb-8">
+                    <h2 class="text-xl font-bold text-stone-800 mb-2">Arrays & Linked Lists</h2>
+                    <p class="text-sm text-stone-600 mb-6">Comparing static (fixed size, contiguous memory) and dynamic (variable size, scattered memory) structures.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <h3 class="font-bold text-teal-700 mb-2 border-b-2 border-teal-200 inline-block">Array (Static & Homogeneous)</h3>
+                            <p class="text-xs text-stone-500 mb-4">Finite number of homogeneous elements stored in consecutive memory locations. Size is fixed at compile time. Zero-based indexing.</p>
+                            <div class="flex items-center gap-1 overflow-x-auto pb-2 hide-scrollbar">
+                                <div class="flex flex-col items-center"><div class="w-12 h-12 bg-stone-100 border-2 border-stone-300 flex items-center justify-center font-mono font-bold text-stone-700">11</div><span class="text-[10px] text-stone-400 mt-1">[0]</span></div>
+                                <div class="flex flex-col items-center"><div class="w-12 h-12 bg-stone-100 border-2 border-stone-300 border-l-0 flex items-center justify-center font-mono font-bold text-stone-700">22</div><span class="text-[10px] text-stone-400 mt-1">[1]</span></div>
+                                <div class="flex flex-col items-center"><div class="w-12 h-12 bg-stone-100 border-2 border-stone-300 border-l-0 flex items-center justify-center font-mono font-bold text-stone-700">33</div><span class="text-[10px] text-stone-400 mt-1">[2]</span></div>
+                                <div class="flex flex-col items-center"><div class="w-12 h-12 bg-stone-100 border-2 border-stone-300 border-l-0 flex items-center justify-center font-mono font-bold text-stone-700">44</div><span class="text-[10px] text-stone-400 mt-1">[3]</span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-amber-600 mb-2 border-b-2 border-amber-200 inline-block">Linked List (Dynamic)</h3>
+                            <p class="text-xs text-stone-500 mb-4">Sequence of nodes connected via links (pointers). Can grow or shrink during execution. Non-contiguous memory.</p>
+                            <div class="flex items-center overflow-x-auto pb-2 hide-scrollbar">
+                                <div class="text-[10px] font-bold text-amber-600 mr-2 uppercase">Head</div>
+                                <div class="flex items-center">
+                                    <div class="flex border-2 border-stone-400 rounded bg-white overflow-hidden h-10 shadow-sm"><div class="px-3 flex items-center justify-center font-mono font-bold text-sm border-r-2 border-stone-400">A</div><div class="w-6 bg-stone-100 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-stone-400"></div></div></div>
+                                    <div class="mx-1 text-stone-400 font-bold">&#8594;</div>
+                                </div>
+                                <div class="flex items-center">
+                                    <div class="flex border-2 border-stone-400 rounded bg-white overflow-hidden h-10 shadow-sm"><div class="px-3 flex items-center justify-center font-mono font-bold text-sm border-r-2 border-stone-400">B</div><div class="w-6 bg-stone-100 flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-stone-400"></div></div></div>
+                                    <div class="mx-1 text-stone-400 font-bold">&#8594;</div>
+                                </div>
+                                <div class="text-[10px] font-mono font-bold text-stone-400">NULL</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div> 
+
+            <div id="view-linear" class="hidden fade-in max-w-5xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-3 tracking-tight">Stacks & Queues</h1>
+                    <p class="text-lg text-stone-600">Interact with the simulators below to understand LIFO and FIFO.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h2 class="text-xl font-bold text-stone-800 mb-4">Stack (LIFO)</h2>
+                        <div class="flex gap-2 mb-6">
+                            <input type="text" id="stack-input" placeholder="Value..." class="w-20 border rounded px-2 py-1 text-sm">
+                            <button onclick="simPush()" class="bg-teal-600 text-white px-3 py-1 rounded text-sm">Push</button>
+                            <button onclick="simPop()" class="bg-stone-200 px-3 py-1 rounded text-sm">Pop</button>
+                        </div>
+                        <div class="relative h-64 border-x-4 border-b-4 border-stone-300 w-40 mx-auto flex flex-col-reverse p-2 bg-stone-50" id="stack-container">
+                            <div class="absolute inset-0 flex items-center justify-center text-stone-300" id="stack-empty-msg">Empty</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h2 class="text-xl font-bold text-stone-800 mb-4">Queue (FIFO)</h2>
+                        <div class="flex gap-2 mb-6">
+                            <input type="text" id="queue-input" placeholder="Value..." class="w-20 border rounded px-2 py-1 text-sm">
+                            <button onclick="simEnqueue()" class="bg-amber-600 text-white px-3 py-1 rounded text-sm">Enqueue</button>
+                            <button onclick="simDequeue()" class="bg-stone-200 px-3 py-1 rounded text-sm">Dequeue</button>
+                        </div>
+                        <div class="relative w-full h-24 border-y-4 border-stone-300 flex items-center px-2 gap-2 bg-stone-50" id="queue-container">
+                            <div class="absolute inset-0 flex items-center justify-center text-stone-300" id="queue-empty-msg">Empty</div>
+                        </div>
+                    </div>
+                </div>
+            </div> ```
+
+### Step 2: Add the "Brain" (JavaScript)
+The buttons won't do anything unless you add the script. Scroll to the very bottom of your file, and right before the `</body>` tag, paste this:
+
+```javascript
+<script>
+    // Logic to switch between pages
+    function switchTab(tabId) {
+        // Hide every view first
+        document.querySelectorAll('main > div').forEach(div => div.classList.add('hidden'));
+        // Show only the one we clicked
+        document.getElementById('view-' + tabId).classList.remove('hidden');
+    }
+
+    // Stack Logic (LIFO)
+    let stack = [];
+    function updateStackUI() {
+        const container = document.getElementById('stack-container');
+        document.getElementById('stack-empty-msg').style.display = stack.length === 0 ? 'flex' : 'none';
+        container.querySelectorAll('.stack-item').forEach(el => el.remove());
+        stack.forEach(val => {
+            const el = document.createElement('div');
+            el.className = 'stack-item w-full h-10 bg-teal-500 text-white flex items-center justify-center rounded mb-1 font-bold';
+            el.innerText = val;
+            container.appendChild(el);
+        });
+    }
+    function simPush() {
+        const val = document.getElementById('stack-input').value;
+        if (val && stack.length < 5) { stack.push(val); updateStackUI(); }
+    }
+    function simPop() { stack.pop(); updateStackUI(); }
+
+    // Queue Logic (FIFO)
+    let queue = [];
+    function updateQueueUI() {
+        const container = document.getElementById('queue-container');
+        document.getElementById('queue-empty-msg').style.display = queue.length === 0 ? 'flex' : 'none';
+        container.querySelectorAll('.queue-item').forEach(el => el.remove());
+        queue.forEach(val => {
+            const el = document.createElement('div');
+            el.className = 'queue-item w-12 h-12 bg-amber-500 text-white flex items-center justify-center rounded-full font-bold';
+            el.innerText = val;
+            container.appendChild(el);
+        });
+    }
+    function simEnqueue() {
+        const val = document.getElementById('queue-input').value;
+        if (val && queue.length < 6) { queue.push(val); updateQueueUI(); }
+    }
+    function simDequeue() { queue.shift(); updateQueueUI(); }
+</script>
+
+            <div id="view-linear" class="hidden fade-in max-w-5xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-3 tracking-tight">Stacks & Queues</h1>
+                    <p class="text-lg text-stone-600">This section covers linear Abstract Data Types (ADTs). Interact with the simulators below to grasp the difference between Last-In-First-Out (LIFO) and First-In-First-Out (FIFO) access mechanisms.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-4 border-b border-stone-100 pb-3">
+                            <h2 class="text-xl font-bold text-stone-800">Stack (LIFO)</h2>
+                            <span class="text-2xl">&#128218;</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4">Operations occur only at one end (TOP). Example: A pile of books. Operations: <code>push()</code>, <code>pop()</code>, <code>peek()</code>.</p>
+                        
+                        <div class="flex gap-2 mb-6">
+                            <input type="text" id="stack-input" placeholder="Value..." maxlength="3" class="w-20 border border-stone-300 rounded px-2 py-1 text-sm outline-none focus:border-teal-500">
+                            <button onclick="simPush()" class="bg-teal-600 hover:bg-teal-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">Push</button>
+                            <button onclick="simPop()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1 rounded text-sm font-medium transition-colors">Pop</button>
+                        </div>
+                        
+                        <div class="relative h-64 border-x-4 border-b-4 border-stone-300 rounded-b-lg w-40 mx-auto flex flex-col-reverse justify-start p-2 bg-stone-50 overflow-hidden" id="stack-container">
+                            <div class="absolute inset-0 flex items-center justify-center text-stone-300 font-medium z-0" id="stack-empty-msg">Empty</div>
+                            </div>
+                        <div class="text-center mt-2 text-xs font-mono text-stone-400">MAX_SIZE = 5</div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <div class="flex justify-between items-center mb-4 border-b border-stone-100 pb-3">
+                            <h2 class="text-xl font-bold text-stone-800">Queue (FIFO)</h2>
+                            <span class="text-2xl">&#128652;</span>
+                        </div>
+                        <p class="text-sm text-stone-600 mb-4">Open at both ends. Insert at REAR, remove from FRONT. Example: Line at a bus stop. Operations: <code>enqueue()</code>, <code>dequeue()</code>.</p>
+                        
+                        <div class="flex gap-2 mb-6">
+                            <input type="text" id="queue-input" placeholder="Value..." maxlength="3" class="w-20 border border-stone-300 rounded px-2 py-1 text-sm outline-none focus:border-amber-500">
+                            <button onclick="simEnqueue()" class="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors">Enqueue</button>
+                            <button onclick="simDequeue()" class="bg-stone-200 hover:bg-stone-300 text-stone-800 px-3 py-1 rounded text-sm font-medium transition-colors">Dequeue</button>
+                        </div>
+                        
+                        <div class="relative w-full h-24 border-y-4 border-stone-300 mt-12 flex items-center px-2 gap-2 bg-stone-50 overflow-hidden" id="queue-container">
+                            <div class="absolute inset-0 flex items-center justify-center text-stone-300 font-medium z-0" id="queue-empty-msg">Empty</div>
+                            </div>
+                        <div class="flex justify-between mt-2 text-xs font-mono text-stone-500 px-2">
+                            <span>&#8593; FRONT</span>
+                            <span>REAR &#8593;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-nonlinear" class="hidden fade-in max-w-5xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-3 tracking-tight">Graphs & Trees</h1>
+                    <p class="text-lg text-stone-600">This section explores hierarchical and network-based data structures. Graphs connect objects (vertices) via links (edges). Trees are a specific acyclic subset of graphs defining parent-child relationships.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h2 class="text-xl font-bold text-stone-800 mb-2">Graph Concepts</h2>
+                        <ul class="text-sm text-stone-600 space-y-2 mb-6">
+                            <li><strong>Vertex (Node):</strong> Represented as interconnected points.</li>
+                            <li><strong>Edge (Link):</strong> The path or line between two vertices.</li>
+                            <li><strong>Directed vs Undirected:</strong> One-way vs Two-way connections.</li>
+                            <li><strong>Adjacency Matrix:</strong> A 2D array representation of edge connections (1 if connected, 0 if not).</li>
+                            <li><strong>Path & Cycle:</strong> A sequence of edges; a cycle starts and ends at the same node.</li>
+                        </ul>
+                        <div class="bg-stone-50 p-4 rounded border border-stone-200 flex items-center justify-center">
+                            <div class="relative w-32 h-32">
+                                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center text-xs font-bold z-10">0</div>
+                                <div class="absolute bottom-0 left-0 w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center text-xs font-bold z-10">1</div>
+                                <div class="absolute bottom-0 right-0 w-8 h-8 bg-teal-600 text-white rounded-full flex items-center justify-center text-xs font-bold z-10">2</div>
+                                <div class="absolute top-4 left-4 w-[60px] h-[2px] bg-stone-400 rotate-[60deg] origin-top-left"></div>
+                                <div class="absolute top-4 right-4 w-[60px] h-[2px] bg-stone-400 -rotate-[60deg] origin-top-right"></div>
+                                <div class="absolute bottom-4 left-8 w-[64px] h-[2px] bg-stone-400"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h2 class="text-xl font-bold text-stone-800 mb-2">Tree & BST Concepts</h2>
+                        <ul class="text-sm text-stone-600 space-y-2 mb-6">
+                            <li><strong>Root & Leaf:</strong> The top node vs a node with no children.</li>
+                            <li><strong>Binary Search Tree (BST):</strong> Left child &lt; Parent &le; Right child.</li>
+                            <li><strong>Spanning Tree:</strong> Subset of a graph connecting all vertices with minimum edges (no cycles).</li>
+                            <li><strong>Traversals (DFT):</strong>
+                                <br>- In-Order (LNR): Sorts BST ascending.
+                                <br>- Pre-Order (NLR): Root visited first.
+                                <br>- Post-Order (LRN): Root visited last.
+                            </li>
+                        </ul>
+                        <div class="bg-stone-50 p-4 rounded border border-stone-200 flex flex-col items-center justify-center">
+                            <div class="text-xs font-bold text-stone-500 mb-2">BST Example</div>
+                            <div class="relative w-48 h-24">
+                                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold z-10">27</div>
+                                <div class="absolute bottom-0 left-[20%] w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold z-10">14</div>
+                                <div class="absolute bottom-0 right-[20%] w-8 h-8 bg-amber-500 text-white rounded-full flex items-center justify-center text-xs font-bold z-10">35</div>
+                                <div class="absolute top-7 left-[35%] w-[40px] h-[2px] bg-stone-400 rotate-[45deg]"></div>
+                                <div class="absolute top-7 right-[35%] w-[40px] h-[2px] bg-stone-400 -rotate-[45deg]"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-parsing" class="hidden fade-in max-w-5xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-3 tracking-tight">Expression Parsing</h1>
+                    <p class="text-lg text-stone-600">This section details how arithmetic expressions are represented and evaluated by computers using Stacks, respecting operator precedence and associativity.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm text-center">
+                        <div class="text-xs text-stone-400 uppercase tracking-widest font-bold mb-1">Infix</div>
+                        <div class="text-xl font-mono text-stone-800 bg-stone-100 py-2 rounded">a + b * c</div>
+                        <div class="text-xs text-stone-500 mt-2">Operator in-between operands.</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm text-center border-t-4 border-t-teal-500">
+                        <div class="text-xs text-stone-400 uppercase tracking-widest font-bold mb-1">Prefix (Polish)</div>
+                        <div class="text-xl font-mono text-stone-800 bg-stone-100 py-2 rounded">+ a * b c</div>
+                        <div class="text-xs text-stone-500 mt-2">Operator ahead of operands.</div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm text-center border-t-4 border-t-amber-500">
+                        <div class="text-xs text-stone-400 uppercase tracking-widest font-bold mb-1">Postfix (Reverse-Polish)</div>
+                        <div class="text-xl font-mono text-stone-800 bg-stone-100 py-2 rounded">a b c * +</div>
+                        <div class="text-xs text-stone-500 mt-2">Operator after operands. Easily parsed by Stacks.</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                    <h2 class="text-xl font-bold text-stone-800 mb-4">Postfix Evaluation Algorithm (Stack Walkthrough)</h2>
+                    <p class="text-sm text-stone-600 mb-6">Evaluating: <code class="font-bold text-teal-700 bg-teal-50 px-2 py-1 rounded">6 4 2 + - 3 8 16 / + * 2 ^ 3 +</code></p>
+                    
+                    <div class="overflow-x-auto pb-4">
+                        <table class="w-full text-sm text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="border-b-2 border-stone-200 text-stone-700">
+                                    <th class="pb-2">Token</th>
+                                    <th class="pb-2">Action</th>
+                                    <th class="pb-2">Stack State (Bottom &rarr; Top)</th>
+                                    <th class="pb-2">Calculation</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-stone-100 font-mono text-stone-600">
+                                <tr><td class="py-2">6</td><td>Push</td><td>[6]</td><td>-</td></tr>
+                                <tr><td class="py-2">4</td><td>Push</td><td>[6, 4]</td><td>-</td></tr>
+                                <tr><td class="py-2">2</td><td>Push</td><td>[6, 4, 2]</td><td>-</td></tr>
+                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">+</td><td>Pop 2, Eval, Push</td><td>[6, 6]</td><td>4 + 2 = 6</td></tr>
+                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">-</td><td>Pop 2, Eval, Push</td><td>[0]</td><td>6 - 6 = 0</td></tr>
+                                <tr><td class="py-2">3</td><td>Push</td><td>[0, 3]</td><td>-</td></tr>
+                                <tr><td class="py-2">8</td><td>Push</td><td>[0, 3, 8]</td><td>-</td></tr>
+                                <tr><td class="py-2">16</td><td>Push</td><td>[0, 3, 8, 16]</td><td>-</td></tr>
+                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">/</td><td>Pop 2, Eval, Push</td><td>[0, 3, 2]</td><td>16 / 8 = 2</td></tr>
+                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">+</td><td>Pop 2, Eval, Push</td><td>[0, 5]</td><td>3 + 2 = 5</td></tr>
+                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">*</td><td>Pop 2, Eval, Push</td><td>[0]</td><td>0 * 5 = 0</td></tr>
+                                <tr><td class="py-2">2</td><td>Push</td><td>[0, 2]</td><td>-</td></tr>
+                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">^</td><td>Pop 2, Eval, Push</td><td>[1]</td><td>2 ^ 0 = 1</td></tr>
+                                <tr><td class="py-2">3</td><td>Push</td><td>[1, 3]</td><td>-</td></tr>
+                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">+</td><td>Pop 2, Eval, Push</td><td class="font-bold text-stone-900">[4]</td><td>1 + 3 = 4</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-searching" class="hidden fade-in max-w-5xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-3 tracking-tight">Search Algorithms</h1>
+                    <p class="text-lg text-stone-600">This section contrasts sorting and searching methodologies. Algorithms are designed to retrieve an element from a structure. Interval searches (like Binary Search) dramatically reduce search time compared to Sequential searches by dividing the search space.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+                    <div class="col-span-1 space-y-6">
+                        <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm">
+                            <h2 class="text-lg font-bold text-stone-800 border-b border-stone-100 pb-2 mb-3">Linear Search</h2>
+                            <p class="text-sm text-stone-600 mb-2">Sequential check over all items one by one. Time complexity increases linearly with data size.</p>
+                            <div class="text-xs font-mono bg-stone-100 p-2 rounded border border-stone-200">
+                                1. i = 1<br>
+                                2. if A[i] == x return i<br>
+                                3. i = i + 1, loop
+                            </div>
+                        </div>
+                        <div class="bg-white p-5 rounded-xl border border-stone-200 shadow-sm border-l-4 border-l-teal-500">
+                            <h2 class="text-lg font-bold text-stone-800 border-b border-stone-100 pb-2 mb-3">Binary Search</h2>
+                            <p class="text-sm text-stone-600 mb-2">Divide and conquer rule. <strong>Mandatory:</strong> Target array must be sorted. Halves the searchable items each step.</p>
+                            <div class="text-xs font-mono bg-stone-100 p-2 rounded border border-stone-200 text-teal-800">
+                                mid = low + (high - low) / 2
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 lg:col-span-2 bg-white p-6 rounded-xl border border-stone-200 shadow-sm">
+                        <h2 class="text-xl font-bold text-stone-800 mb-4 text-center">Time Complexity Comparison</h2>
+                        <div class="chart-container">
+                            <canvas id="searchChart"></canvas>
+                        </div>
+                        <p class="text-xs text-stone-400 text-center mt-4">Illustrates generic growth: Linear O(n) vs Binary O(log n). Binary search flattens out, handling large datasets efficiently.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="view-practice" class="hidden fade-in max-w-5xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-stone-900 mb-3 tracking-tight">Practice & Exams</h1>
+                    <p class="text-lg text-stone-600">Test your knowledge with these structured questions extracted from BIT1083-DIT1034 Assignment 1 and the Midterm Mock Exam. Grab a pen and paper to trace the data structures!</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-8 mb-8">
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm border-t-4 border-t-teal-500">
+                        <div class="flex justify-between items-center mb-4 border-b border-stone-100 pb-3">
+                            <h2 class="text-xl font-bold text-stone-800">Assignment 1 (Theory & Tracing)</h2>
+                            <span class="text-2xl">&#128221;</span>
+                        </div>
+                        
+                        <div class="space-y-6 text-sm text-stone-700">
+                            <div>
+                                <h3 class="font-bold text-teal-700 mb-1">Question 1: Real-time Applications</h3>
+                                <p>Describe how each of the data structures listed below is used in real-time, including suitable examples: <br>
+                                <span class="font-mono bg-stone-100 px-2 py-1 rounded text-xs">Array</span> 
+                                <span class="font-mono bg-stone-100 px-2 py-1 rounded text-xs">Linked-list</span> 
+                                <span class="font-mono bg-stone-100 px-2 py-1 rounded text-xs">Stack</span> 
+                                <span class="font-mono bg-stone-100 px-2 py-1 rounded text-xs">Queue</span> 
+                                <span class="font-mono bg-stone-100 px-2 py-1 rounded text-xs">Graph & Tree</span></p>
+                            </div>
+                            
+                            <hr class="border-stone-100">
+
+                            <div>
+                                <h3 class="font-bold text-teal-700 mb-1">Question 2: Dynamic Stack Tracing</h3>
+                                <p class="mb-2">Given an initial dynamic stack containing items: <code>[11, 12, 13, 14]</code> (where 11 is top). Draw the sequences of the stack after the following actions:</p>
+                                <ul class="list-disc pl-5 space-y-1 text-stone-600">
+                                    <li>(a) POP three items from the stack.</li>
+                                    <li>(b) PUSH item 56, 57, 55, 54, 50 and 52 into the stack.</li>
+                                    <li>(c) POP four items from the stack.</li>
+                                    <li>(d) PUSH items 67, 66, 64 and 65 into the stack.</li>
+                                    <li>(e) POP six items from the stack.</li>
+                                    <li>(f) State the item pointed by TOP after operation in (e) is done.</li>
+                                </ul>
+                            </div>
+
+                            <hr class="border-stone-100">
+
+                            <div>
+                                <h3 class="font-bold text-teal-700 mb-1">Question 3 & 4: Static Queue Tracing</h3>
+                                <p class="mb-2">Assume the MAX location size for the static queue is 30 with starting index [0]. Initial static queue includes alphabets <code>E, M, T, H, Y</code>. Draw the sequence and prepare the FRONT/REAR index table after each operation:</p>
+                                <ul class="list-disc pl-5 space-y-1 text-stone-600">
+                                    <li>(a) DEQUEUE two items.</li>
+                                    <li>(b) ENQUEUE Z, O, N, P, I, W.</li>
+                                    <li>(c) DEQUEUE three items.</li>
+                                    <li>(d) ENQUEUE V, A, S, F, R.</li>
+                                    <li>(e) DEQUEUE four items.</li>
+                                    <li>(f) ENQUEUE Q, D, J, G, L.</li>
+                                    <li>(g) DEQUEUE five items.</li>
+                                    <li>(h) ENQUEUE B, C, X, K, U.</li>
+                                    <li>(i) DEQUEUE three items.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl border border-stone-200 shadow-sm border-t-4 border-t-amber-500">
+                        <div class="flex justify-between items-center mb-4 border-b border-stone-100 pb-3">
+                            <h2 class="text-xl font-bold text-stone-800">Midterm Mock Exam</h2>
+                            <span class="text-2xl">&#127919;</span>
+                        </div>
+
+                        <div class="space-y-6 text-sm text-stone-700">
+                            <div>
+                                <h3 class="font-bold text-amber-600 mb-1">Question 1: Queue Index Table</h3>
+                                <p class="mb-2">Assume max location size for the static queue is 20 with starting index [0]. Prepare ONE index table to identify the FRONT and REAR index after each operation:</p>
+                                <ul class="list-disc pl-5 space-y-1 text-stone-600 mb-2">
+                                    <li>Initial static queue with <code>X, S, F, T, M, J</code>.</li>
+                                    <li>ENQUEUE M and H.</li>
+                                    <li>DEQUEUE two letters, then DEQUEUE one letter.</li>
+                                    <li>ENQUEUE S, P and D.</li>
+                                    <li>DEQUEUE five letters.</li>
+                                    <li>ENQUEUE A, B, C, D, E.</li>
+                                    <li>DEQUEUE three letters, then ENQUEUE X, Y, Z.</li>
+                                    <li>DEQUEUE six letters.</li>
+                                </ul>
+                            </div>
+
+                            <hr class="border-stone-100">
+
+                            <div>
+                                <h3 class="font-bold text-amber-600 mb-1">Question 2: Structures (C++)</h3>
+                                <p class="mb-2">Produce ONE (1) program to declare a structure together with four structure variables to store the following information:</p>
+                                <div class="overflow-x-auto border border-stone-200 rounded">
+                                    <table class="w-full text-xs text-left text-stone-600">
+                                        <thead class="bg-stone-100 font-bold border-b border-stone-200">
+                                            <tr><th class="p-2">ID</th><th class="p-2">Name</th><th class="p-2">Age</th><th class="p-2">CGPA</th><th class="p-2">Intake</th></tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-stone-100">
+                                            <tr><td class="p-2">202301031005</td><td class="p-2">Ismail Hamdan</td><td class="p-2">20</td><td class="p-2">3.90</td><td class="p-2">Jan 2023</td></tr>
+                                            <tr><td class="p-2">202009013011</td><td class="p-2">Chen Yen Yie</td><td class="p-2">25</td><td class="p-2">3.65</td><td class="p-2">Sep 2020</td></tr>
+                                            <tr><td class="p-2">202205014143</td><td class="p-2">Kalaiselvam Guru</td><td class="p-2">21</td><td class="p-2">2.73</td><td class="p-2">May 2022</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <hr class="border-stone-100">
+
+                            <div>
+                                <h3 class="font-bold text-amber-600 mb-1">Question 3: Theory & Diagrams</h3>
+                                <ul class="list-disc pl-5 space-y-2 text-stone-600">
+                                    <li><strong>(a)</strong> Identify THREE types of linked-list structures by giving its diagrams.</li>
+                                    <li><strong>(b)</strong> Give ONE example of a stack and ONE example of a queue in the real-world.</li>
+                                    <li><strong>(c)</strong> Draw the node structure used in the linked-list data structure.</li>
+                                    <li><strong>(d)</strong> Given an initial linked list: <code>Head &rarr; # &rarr; S</code>. Draw the linked list after adding <code>$</code> and <code>#</code> in between symbol <code>#</code> and <code>$</code>.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        // Tab Navigation Logic
+        const tabs = ['foundations', 'linear', 'nonlinear', 'parsing', 'searching', 'practice'];
+        
+        function switchTab(activeTab) {
+            tabs.forEach(tab => {
+                const view = document.getElementById(`view-${tab}`);
+                const btn = document.getElementById(`btn-${tab}`);
+                
+                if (tab === activeTab) {
+                    view.classList.remove('hidden');
+                    view.classList.add('block');
+                    if (btn) {
+                        btn.classList.add('bg-teal-50', 'text-teal-700');
+                        btn.classList.remove('text-stone-600', 'hover:bg-stone-50');
+                    }
+                } else {
+                    view.classList.remove('block');
+                    view.classList.add('hidden');
+                    if (btn) {
+                        btn.classList.remove('bg-teal-50', 'text-teal-700');
+                        btn.classList.add('text-stone-600', 'hover:bg-stone-50');
+                    }
+                }
+            });
+
+            // Re-render chart if navigating to searching
+            if (activeTab === 'searching' && searchChartInstance) {
+                searchChartInstance.update();
+            }
+        }
+
+        // Stack Simulator Logic (LIFO)
+        let stackData = [];
+        const MAX_STACK = 5;
+        const stackContainer = document.getElementById('stack-container');
+        const stackEmptyMsg = document.getElementById('stack-empty-msg');
+
+        function updateStackUI() {
+            stackContainer.innerHTML = '';
+            if (stackData.length === 0) {
+                stackContainer.appendChild(stackEmptyMsg);
+                stackEmptyMsg.style.display = 'flex';
+                return;
+            }
+            stackEmptyMsg.style.display = 'none';
+            
+            // Render from bottom to top, but flex-col-reverse handles visual bottom-up stacking
+            stackData.forEach((val, i) => {
+                const isTop = i === stackData.length - 1;
+                const el = document.createElement('div');
+                el.className = `ds-box node-pop w-full h-10 border-2 rounded flex items-center justify-between px-3 font-mono font-bold mb-1 shadow-sm shrink-0 ${isTop ? 'bg-teal-100 border-teal-500 text-teal-800' : 'bg-white border-stone-400 text-stone-700'}`;
+                el.innerHTML = `<span>${val}</span> ${isTop ? '<span class="text-[10px] text-teal-600">&larr; TOP</span>' : ''}`;
+                stackContainer.appendChild(el);
+            });
+        }
+
+        function simPush() {
+            const input = document.getElementById('stack-input');
+            const val = input.value.trim() || Math.floor(Math.random() * 99);
+            if (stackData.length >= MAX_STACK) {
+                alert("Stack Overflow! Maximum size is 5.");
+                return;
+            }
+            stackData.push(val);
+            input.value = '';
+            updateStackUI();
+        }
+
+        function simPop() {
+            if (stackData.length === 0) {
+                alert("Stack Underflow! Stack is already empty.");
+                return;
+            }
+            stackData.pop();
+            updateStackUI();
+        }
+
+        // Queue Simulator Logic (FIFO)
+        let queueData = [];
+        const MAX_QUEUE = 5;
+        const queueContainer = document.getElementById('queue-container');
+        const queueEmptyMsg = document.getElementById('queue-empty-msg');
+
+        function updateQueueUI() {
+            queueContainer.innerHTML = '';
+            if (queueData.length === 0) {
+                queueContainer.appendChild(queueEmptyMsg);
+                queueEmptyMsg.style.display = 'flex';
+                return;
+            }
+            queueEmptyMsg.style.display = 'none';
+
+            queueData.forEach((val, i) => {
+                const el = document.createElement('div');
+                el.className = `ds-box node-pop w-12 h-12 border-2 rounded flex items-center justify-center font-mono font-bold shadow-sm shrink-0 bg-white border-stone-400 text-stone-700`;
+                el.innerHTML = val;
+                
+                // Add styling for visual flair (Front is Amber)
+                if (i === 0) {
+                    el.classList.add('bg-amber-50', 'border-amber-500', 'text-amber-800');
+                }
+                
+                queueContainer.appendChild(el);
+            });
+        }
+
+        function simEnqueue() {
+            const input = document.getElementById('queue-input');
+            const val = input.value.trim() || Math.floor(Math.random() * 99);
+            if (queueData.length >= MAX_QUEUE) {
+                alert("Queue Overflow! Maximum size is 5.");
+                return;
+            }
+            queueData.push(val); // Add to end (Rear)
+            input.value = '';
+            updateQueueUI();
+        }
+
+        function simDequeue() {
+            if (queueData.length === 0) {
+                alert("Queue Underflow! Queue is already empty.");
+                return;
+            }
+            queueData.shift(); // Remove from front
+            updateQueueUI();
+        }
+
+        // Chart.js Setup for Searching Tab
+        let searchChartInstance = null;
+
+        function initChart() {
+            const ctx = document.getElementById('searchChart').getContext('2d');
+            
+            // Generate conceptual data points for O(n) vs O(log n)
+            const labels = [10, 50, 100, 500, 1000, 5000];
+            const linearData = labels.map(n => n); // O(n)
+            const binaryData = labels.map(n => Math.log2(n) * 100); // Scaled O(log n) for visual comparison
+            
+            searchChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Linear Search Operations O(n)',
+                            data: linearData,
+                            borderColor: 'rgb(87, 83, 78)', // stone-600
+                            backgroundColor: 'rgba(87, 83, 78, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.1,
+                            pointRadius: 3
+                        },
+                        {
+                            label: 'Binary Search Operations O(log n)',
+                            data: binaryData,
+                            borderColor: 'rgb(13, 148, 136)', // teal-600
+                            backgroundColor: 'rgba(13, 148, 136, 0.1)',
+                            borderWidth: 3,
+                            tension: 0.3,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: { display: true, text: 'Comparisons / Time' },
+                            beginAtZero: true
+                        },
+                        x: {
+                            title: { display: true, text: 'Elements in Data Structure (N)' }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Init
+        window.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            updateStackUI();
+            updateQueueUI();
+        });
+
+    </script>
+    <script>
+    // 1. Navigation Logic
+    function switchTab(tabId) {
+        // Hide all views
+        const views = ['foundations', 'linear', 'nonlinear', 'parsing', 'searching', 'practice'];
+        views.forEach(id => {
+            const view = document.getElementById('view-' + id);
+            if (view) view.classList.add('hidden');
+            
+            const btn = document.getElementById('btn-' + id);
+            if (btn) btn.classList.remove('bg-teal-50', 'text-teal-700');
+            if (btn) btn.classList.add('text-stone-600');
+        });
+
+        // Show selected view
+        const activeView = document.getElementById('view-' + tabId);
+        if (activeView) activeView.classList.remove('hidden');
+        
+        const activeBtn = document.getElementById('btn-' + tabId);
+        if (activeBtn) {
+            activeBtn.classList.add('bg-teal-50', 'text-teal-700');
+            activeBtn.classList.remove('text-stone-600');
+        }
+    }
+
+    // 2. Stack Logic (LIFO)
+    let stack = [];
+    const MAX_STACK = 5;
+
+    function updateStackUI() {
+        const container = document.getElementById('stack-container');
+        const emptyMsg = document.getElementById('stack-empty-msg');
+        
+        container.querySelectorAll('.stack-item').forEach(el => el.remove());
+        emptyMsg.style.display = stack.length === 0 ? 'flex' : 'none';
+
+        stack.forEach((val, index) => {
+            const el = document.createElement('div');
+            el.className = 'stack-item node-pop w-full h-10 bg-teal-500 text-white flex items-center justify-center rounded mb-1 font-bold shadow-sm z-10';
+            el.innerText = val;
+            container.appendChild(el);
+        });
+    }
+
+    function simPush() {
+        const input = document.getElementById('stack-input');
+        if (input.value && stack.length < MAX_STACK) {
+            stack.push(input.value);
+            input.value = '';
+            updateStackUI();
+        }
+    }
+
+    function simPop() {
+        stack.pop();
+        updateStackUI();
+    }
+
+    // 3. Queue Logic (FIFO)
+    let queue = [];
+    const MAX_QUEUE = 6;
+
+    function updateQueueUI() {
+        const container = document.getElementById('queue-container');
+        const emptyMsg = document.getElementById('queue-empty-msg');
+        
+        container.querySelectorAll('.queue-item').forEach(el => el.remove());
+        emptyMsg.style.display = queue.length === 0 ? 'flex' : 'none';
+
+        queue.forEach(val => {
+            const el = document.createElement('div');
+            el.className = 'queue-item node-pop w-12 h-12 bg-amber-500 text-white flex items-center justify-center rounded-full font-bold shadow-sm z-10 shrink-0';
+            el.innerText = val;
+            container.appendChild(el);
+        });
+    }
+
+    function simEnqueue() {
+        const input = document.getElementById('queue-input');
+        if (input.value && queue.length < MAX_QUEUE) {
+            queue.push(input.value);
+            input.value = '';
+            updateQueueUI();
+        }
+    }
+
+    function simDequeue() {
+        queue.shift();
+        updateQueueUI();
+    }
+
+    // 4. Initialize on Page Load
+    window.onload = () => {
+        updateStackUI();
+        updateQueueUI();
+    };
+</script>
+</body>
+</html>
