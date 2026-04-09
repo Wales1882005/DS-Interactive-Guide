@@ -1,1 +1,11 @@
-config.js
+# Ignore local environment variables (if you ever test Netlify on your PC)
+.env
+
+# Ignore Mac system files (if you or a teammate ever uses a Mac)
+.DS_Store
+
+# Ignore Node modules (if you ever add npm packages in the future)
+node_modules/
+
+# Ignore Netlify's local cache folder
+.netlify/
