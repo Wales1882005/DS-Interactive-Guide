@@ -3,26 +3,21 @@ module.exports = async function(req, res) {
 
   try {
     console.log("1. Graph Request received by Vercel.");
-    
     let body = req.body;
-    if (typeof body === 'string') {
-        body = JSON.parse(body);
-    }
+    if (typeof body === 'string') body = JSON.parse(body);
 
-    const text = body.text;
     const apiKey = process.env.GEMINI_API_KEY;
-
     if (!apiKey) {
       console.error("ERROR: API Key is missing!");
       return res.status(500).json({ error: "API Key is missing." });
     }
 
-    console.log("2. Sending Graph request to Gemini 1.5 Flash...");
-   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+    console.log("2. Sending POST request to Gemini...");
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: text }] }],
+        contents: [{ parts: [{ text: body.text }] }],
         systemInstruction: { parts: [{ text: "Extract graph nodes and directed edges." }] },
         generationConfig: {
           responseMimeType: "application/json",
