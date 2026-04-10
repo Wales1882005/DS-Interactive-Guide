@@ -12,8 +12,8 @@ module.exports = async function(req, res) {
       return res.status(500).json({ error: "API Key is missing." });
     }
 
-    console.log("2. Sending POST request to Gemini...");
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
+    console.log("2. Sending POST request to Gemini Pro...");
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
