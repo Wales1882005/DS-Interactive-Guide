@@ -1048,7 +1048,8 @@
       }
 
       // Extract text from the backend response
-      const aiText = data.candidates[0].content.parts[0].text;
+      const rawText = data.candidates[0].content.parts[0].text;
+      const aiText = marked.parse(rawText);
       
       if (typeof hideTypingIndicator === 'function') hideTypingIndicator();
       if (typeof removeTypingIndicator === 'function') removeTypingIndicator();
