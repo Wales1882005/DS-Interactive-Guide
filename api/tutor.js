@@ -12,29 +12,56 @@ module.exports = async function(req, res) {
       return res.status(500).json({ error: "API Key is missing." });
     }
 
-    console.log("2. Sending POST request to Gemini 2.5 Flash...");
-    
-    // Notice the method: 'POST' right below the URL!
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ 
-          parts: [{ text: `System: ${body.context || "You are an expert tutor."}\n\nUser: ${body.prompt}` }] 
-        }]
-      })
-    });
+    // Your prioritized list of models
+    const MODEL_PRIORITY = ["gemini-3-flash-preview", "gemini-2.0-flash", "gemini-2.5-flash-lite"];
+    let lastError = "Unknown Error";
 
-    const data = await response.json();
-    console.log("3. Google responded with status:", response.status);
+    // Loop through the models one by one
+    for (const model of MODEL_PRIORITY) {
+      console.log(`\n--- Trying model: ${model} ---`);
+      
+      try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ 
+              parts: [{ text: `System: ${body.context || "You are an expert tutor."}\n\nUser: ${body.prompt}` }] 
+            }]
+          })
+        });
 
-    if (!response.ok) {
-      console.error("ERROR FROM GOOGLE:", data);
-      return res.status(500).json({ error: data.error?.message || "Google API Error" });
+        const data = await response.json();
+
+        // If it worked, send the data and STOP the loop!
+        if (response.ok) {
+          console.log(`Success! ${model} generated the response.`);
+          return res.status(200).json(data);
+        } 
+        
+        // If Google threw an error, save it
+        console.error(`Error from ${model} (Status ${response.status}):`, data);
+        lastError = data.error?.message || "Google API Error";
+
+        // If the model is overloaded (503) or not found (404), skip to the next model
+        if (response.status === 503 || response.status === 404) {
+          console.log(`Triggering fallback. Moving to next model in list...`);
+          continue; 
+        } else {
+          // If it's a different error (like a bad API key), stop trying and return the error
+          return res.status(response.status).json({ error: lastError });
+        }
+
+      } catch (fetchError) {
+        console.error(`Network fetch failed for ${model}:`, fetchError);
+        lastError = fetchError.message;
+        continue;
+      }
     }
 
-    console.log("4. Success! Sending response to website.");
-    return res.status(200).json(data);
+    // If the loop finishes and EVERY model failed:
+    console.error("CRITICAL: All fallback models failed.");
+    return res.status(503).json({ error: `All models are currently overloaded. Last error: ${lastError}` });
 
   } catch (error) {
     console.error("FATAL SERVER ERROR:", error);
