@@ -1032,7 +1032,7 @@
 
    try {
       // Securely calling your Netlify backend (which holds the secret key)
-      const response = await fetch('/.netlify/functions/tutor', {
+      const response = await fetch('/api/tutor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1066,6 +1066,7 @@
 }
 
         // Graph Generator using SDK JSON Schema
+      // Graph Generator using Vercel API
         async function generateGraphWithAI() {
             const inputEl = document.getElementById('ai-graph-input'); 
             const btn = document.getElementById('ai-graph-btn'); 
@@ -1079,37 +1080,21 @@
             loading.classList.remove('hidden');
 
             try {
-                // Dynamically import the Google Gen AI SDK and the Type enum
-                const { GoogleGenAI, Type } = await import('https://esm.run/@google/genai');
-                const ai = new GoogleGenAI({ apiKey: apiKey });
-
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: text,
-                    config: {
-                        systemInstruction: "Extract graph nodes and directed edges.",
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: Type.OBJECT,
-                            properties: {
-                                nodes: { type: Type.ARRAY, items: { type: Type.STRING } },
-                                edges: { 
-                                    type: Type.ARRAY, 
-                                    items: { 
-                                        type: Type.OBJECT, 
-                                        properties: { 
-                                            from: { type: Type.STRING }, 
-                                            to: { type: Type.STRING } 
-                                        } 
-                                    } 
-                                }
-                            },
-                            required: ["nodes", "edges"]
-                        }
-                    }
+                // Securely call your new Vercel graph backend
+                const response = await fetch('/api/graph', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: text })
                 });
 
-                const resultText = response.text;
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || "Failed to generate graph.");
+                }
+
+                const resultText = data.text;
+                
                 if(resultText) {
                     const parsed = JSON.parse(resultText);
                     if(parsed.nodes && parsed.nodes.length > 0) {
@@ -1140,7 +1125,7 @@
                 }
             } catch (e) { 
                 console.error(e);
-                alert("Failed to generate graph. Please check your API key."); 
+                alert("Failed to generate graph. Please check your Vercel API connection."); 
             } finally { 
                 inputEl.disabled = false; 
                 btn.disabled = false; 
@@ -1148,7 +1133,6 @@
                 inputEl.value = ''; 
             }
         }
-
         // Init
         window.addEventListener('DOMContentLoaded', () => {
             updateStackUI(); updateQueueUI(); switchTab('foundations');
