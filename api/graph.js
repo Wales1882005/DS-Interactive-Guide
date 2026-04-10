@@ -13,8 +13,7 @@ module.exports = async function(req, res) {
     }
 
     console.log("2. Sending POST request to Gemini Pro...");
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
-      method: 'POST',
+   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{ parts: [{ text: body.text }] }],
