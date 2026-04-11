@@ -670,21 +670,25 @@
 
         function updateStackUI() {
             const container = document.getElementById('stack-container');
+            
+            // Reset container but always keep the Empty message available
+            container.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-slate-300 font-medium z-0" id="stack-empty-msg">Empty</div>';
             const emptyMsg = document.getElementById('stack-empty-msg');
-            container.innerHTML = '';
+            
             if (stackData.length === 0) {
-                container.appendChild(emptyMsg); emptyMsg.style.display = 'flex'; return;
+                emptyMsg.style.display = 'flex'; 
+                return;
             }
+            
             emptyMsg.style.display = 'none';
             stackData.forEach((val, i) => {
                 const isTop = i === stackData.length - 1;
                 const el = document.createElement('div');
-                el.className = `ds-box node-pop w-full h-10 border-2 rounded flex items-center justify-between px-3 font-mono font-bold mb-1 shadow-sm shrink-0 ${isTop ? 'bg-teal-100 border-teal-500 text-teal-800' : 'bg-white border-slate-400 text-slate-700'}`;
+                el.className = `ds-box node-pop w-full h-10 border-2 rounded flex items-center justify-between px-3 font-mono font-bold mb-1 shadow-sm shrink-0 z-10 ${isTop ? 'bg-teal-100 border-teal-500 text-teal-800' : 'bg-white border-slate-400 text-slate-700'}`;
                 el.innerHTML = `<span>${val}</span> ${isTop ? '<span class="text-[10px] text-teal-600">&larr; TOP</span>' : ''}`;
                 container.appendChild(el);
             });
         }
-
         function simPush() {
             const input = document.getElementById('stack-input');
             const val = input.value.trim() || Math.floor(Math.random() * 99);
@@ -697,19 +701,25 @@
             stackData.pop(); updateStackUI();
         }
 
-        function updateQueueUI() {
+      function updateQueueUI() {
             const container = document.getElementById('queue-container');
+            
+            // Reset container but always keep the Empty message available
+            container.innerHTML = '<div class="absolute inset-0 flex items-center justify-center text-slate-300 font-medium z-0" id="queue-empty-msg">Empty</div>';
             const emptyMsg = document.getElementById('queue-empty-msg');
-            container.innerHTML = '';
+            
             if (queueData.length === 0) {
-                container.appendChild(emptyMsg); emptyMsg.style.display = 'flex'; return;
+                emptyMsg.style.display = 'flex'; 
+                return;
             }
+            
             emptyMsg.style.display = 'none';
             queueData.forEach((val, i) => {
                 const el = document.createElement('div');
-                el.className = `ds-box node-pop w-12 h-12 border-2 rounded flex items-center justify-center font-mono font-bold shadow-sm shrink-0 bg-white border-slate-400 text-slate-700`;
+                el.className = `ds-box node-pop w-12 h-12 border-2 rounded flex items-center justify-center font-mono font-bold shadow-sm shrink-0 z-10 bg-white border-slate-400 text-slate-700`;
                 if (i === 0) el.classList.add('bg-amber-50', 'border-amber-500', 'text-amber-800');
-                el.innerHTML = val; container.appendChild(el);
+                el.innerHTML = val; 
+                container.appendChild(el);
             });
         }
 
