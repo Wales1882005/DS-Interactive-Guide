@@ -424,23 +424,27 @@
                     <p class="text-lg text-slate-600">This section contrasts sorting and searching methodologies. Algorithms are designed to retrieve an element from a structure. Interval searches (like Binary Search) dramatically reduce search time compared to Sequential searches.</p>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-                    <div class="col-span-1 space-y-6">
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-                            <h2 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Linear Search</h2>
-                            <p class="text-sm text-slate-600 mb-2">Sequential check over all items one by one. Time complexity increases linearly with data size.</p>
+               <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                    <div class="flex flex-wrap items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+                        <h2 class="text-xl font-bold text-slate-800">Interactive Visualizer</h2>
+                        <select id="search-algo" onchange="resetSearch()" class="border border-slate-300 rounded px-3 py-1.5 text-sm outline-none focus:border-teal-500">
+                            <option value="linear">Linear Search</option>
+                            <option value="binary">Binary Search</option>
+                        </select>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-bold text-slate-600">Target:</span>
+                            <input type="number" id="search-target" value="23" onchange="resetSearch()" class="w-20 border border-slate-300 rounded px-3 py-1.5 text-sm outline-none focus:border-teal-500">
                         </div>
-                        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm border-l-4 border-l-teal-500">
-                            <h2 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2 mb-3">Binary Search</h2>
-                            <p class="text-sm text-slate-600 mb-2">Divide and conquer rule. <strong>Mandatory:</strong> Target array must be sorted. Halves the searchable items each step.</p>
-                        </div>
+                        <button onclick="stepSearch()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-1.5 rounded text-sm font-medium transition-colors ml-auto shadow-sm">Step Forward</button>
+                        <button onclick="resetSearch()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-1.5 rounded text-sm font-medium transition-colors shadow-sm">Reset</button>
                     </div>
-
-                    <div class="col-span-1 lg:col-span-2 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                        <h2 class="text-xl font-bold text-slate-800 mb-4 text-center">Time Complexity Comparison</h2>
-                        <div class="chart-container">
-                            <canvas id="searchChart"></canvas>
-                        </div>
+                    
+                    <div class="flex-1 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center p-4">
+                        <canvas id="searchCanvas" width="600" height="150" class="w-full object-contain"></canvas>
+                    </div>
+                    
+                    <div id="search-log" class="mt-4 p-4 bg-teal-50 border border-teal-200 rounded text-sm text-teal-900 font-mono font-medium shadow-inner">
+                        Ready to search. Select an algorithm and click 'Step Forward' to begin.
                     </div>
                 </div>
             </section>
@@ -977,7 +981,7 @@
         }
 
         function renderAll() {
-            renderGraphSection(); renderTreeSection(); renderTraversalCanvas(); renderSpanningCanvas(); renderExprCanvas(); initCharts();
+            renderGraphSection(); renderTreeSection(); renderTraversalCanvas(); renderSpanningCanvas(); renderExprCanvas(); initCharts(); renderSearchCanvas();
         }
 
        
@@ -1173,6 +1177,107 @@
                 document.body.style.cursor = 'default';
             }
         });
+
+        // --- Search Visualizer Logic ---
+        const searchData = [2, 5, 8, 12, 16, 23, 38, 40];
+        let searchStep = 0;
+        let searchState = { left: 0, right: searchData.length - 1, mid: -1, found: false };
+
+        function resetSearch() {
+            searchStep = 0;
+            searchState = { left: 0, right: searchData.length - 1, mid: -1, found: false };
+            const logEl = document.getElementById('search-log');
+            if (logEl) {
+                logEl.className = "mt-4 p-4 bg-teal-50 border border-teal-200 rounded text-sm text-teal-900 font-mono font-medium shadow-inner";
+                logEl.innerText = "Ready to search. Click 'Step Forward' to begin.";
+            }
+            renderSearchCanvas();
+        }
+
+        function stepSearch() {
+            if (searchState.found) return;
+            const algo = document.getElementById('search-algo').value;
+            const target = parseInt(document.getElementById('search-target').value);
+            const logEl = document.getElementById('search-log');
+
+            if (algo === 'linear') {
+                if (searchStep >= searchData.length) {
+                    logEl.innerText = `Target ${target} not found in array.`;
+                    logEl.className = "mt-4 p-4 bg-red-50 border border-red-200 rounded text-sm text-red-900 font-mono font-medium";
+                    return;
+                }
+                if (searchData[searchStep] === target) {
+                    logEl.innerText = `Step ${searchStep + 1}: Checked index [${searchStep}]. ${searchData[searchStep]} == ${target}. FOUND IT!`;
+                    logEl.className = "mt-4 p-4 bg-amber-50 border border-amber-200 rounded text-sm text-amber-900 font-mono font-bold";
+                    searchState.found = true;
+                } else {
+                    logEl.innerText = `Step ${searchStep + 1}: Checked index [${searchStep}]. ${searchData[searchStep]} is not ${target}. Moving to next box...`;
+                }
+                searchStep++;
+            } 
+            else if (algo === 'binary') {
+                if (searchState.left > searchState.right) {
+                    logEl.innerText = `Target ${target} not found! Left pointer crossed Right pointer.`;
+                    logEl.className = "mt-4 p-4 bg-red-50 border border-red-200 rounded text-sm text-red-900 font-mono font-medium";
+                    return;
+                }
+                searchState.mid = Math.floor((searchState.left + searchState.right) / 2);
+                let midVal = searchData[searchState.mid];
+                
+                if (midVal === target) {
+                    logEl.innerText = `Step ${searchStep + 1}: Middle is index [${searchState.mid}]. ${midVal} == ${target}. FOUND IT!`;
+                    logEl.className = "mt-4 p-4 bg-amber-50 border border-amber-200 rounded text-sm text-amber-900 font-mono font-bold";
+                    searchState.found = true;
+                } else if (midVal < target) {
+                    logEl.innerText = `Step ${searchStep + 1}: Middle is ${midVal}. ${midVal} < ${target}. Throwing away the LEFT half!`;
+                    searchState.left = searchState.mid + 1;
+                } else {
+                    logEl.innerText = `Step ${searchStep + 1}: Middle is ${midVal}. ${midVal} > ${target}. Throwing away the RIGHT half!`;
+                    searchState.right = searchState.mid - 1;
+                }
+                searchStep++;
+            }
+            renderSearchCanvas();
+        }
+
+        function renderSearchCanvas() {
+            if(state.activeTab !== 'searching') return;
+            const canvas = document.getElementById('searchCanvas');
+            if(!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const boxW = 50, boxH = 50, gap = 10;
+            const startX = (canvas.width - (searchData.length * (boxW + gap))) / 2;
+            const startY = 50;
+            const algo = document.getElementById('search-algo') ? document.getElementById('search-algo').value : 'linear';
+
+            searchData.forEach((val, i) => {
+                let bg = '#ffffff', border = '#64748b', text = '#0f172a';
+                
+                if (algo === 'linear') {
+                    if (i === searchStep - 1 && searchState.found) { bg = '#dcfce7'; border = '#22c55e'; }
+                    else if (i === searchStep - 1) { bg = '#fef3c7'; border = '#f59e0b'; }
+                    else if (i < searchStep - 1) { bg = '#f1f5f9'; text = '#94a3b8'; border = '#cbd5e1'; }
+                } else if (algo === 'binary') {
+                    if (searchState.found && i === searchState.mid) { bg = '#dcfce7'; border = '#22c55e'; }
+                    else if (i === searchState.mid) { bg = '#fef3c7'; border = '#f59e0b'; }
+                    else if (i < searchState.left || i > searchState.right) { bg = '#f1f5f9'; text = '#94a3b8'; border = '#cbd5e1'; }
+                    else { bg = '#e0f2fe'; border = '#0ea5e9'; }
+                }
+
+                ctx.beginPath(); ctx.rect(startX + i * (boxW + gap), startY, boxW, boxH);
+                ctx.fillStyle = bg; ctx.fill();
+                ctx.lineWidth = 2; ctx.strokeStyle = border; ctx.stroke();
+                
+                ctx.fillStyle = text; ctx.font = 'bold 18px Inter';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(val, startX + i * (boxW + gap) + boxW/2, startY + boxH/2);
+                
+                ctx.fillStyle = '#94a3b8'; ctx.font = '12px monospace';
+                ctx.fillText(`[${i}]`, startX + i * (boxW + gap) + boxW/2, startY + boxH + 20);
+            });
+        }
         // Init
         window.addEventListener('DOMContentLoaded', () => {
             updateStackUI(); updateQueueUI(); switchTab('foundations');
