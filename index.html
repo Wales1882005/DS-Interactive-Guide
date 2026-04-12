@@ -567,8 +567,11 @@
             <span class="text-2xl group-hover:scale-110 transition-transform">✨</span>
         </button>
 
-        <div id="ai-panel" class="fixed inset-y-0 right-0 w-80 sm:w-96 bg-white shadow-2xl border-l border-slate-200 transform translate-x-full z-50 flex flex-col">
-            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <div id="ai-panel" class="fixed inset-y-0 right-0 bg-white shadow-2xl border-l border-slate-200 transform translate-x-full z-50 flex flex-col max-w-full" style="width: 384px;">
+            
+            <div id="panel-resizer" class="absolute top-0 bottom-0 left-0 w-2 cursor-col-resize hover:bg-amber-400 active:bg-amber-600 transition-colors z-50"></div>
+
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 ml-2">
                 <div>
                     <h2 class="font-bold text-slate-800 flex items-center gap-2">
                         <span>AI Tutor</span>
@@ -1143,6 +1146,33 @@
                 inputEl.value = ''; 
             }
         }
+        // --- AI Panel Resizer Logic ---
+        const aiPanel = document.getElementById('ai-panel');
+        const resizer = document.getElementById('panel-resizer');
+        let isResizing = false;
+
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            e.preventDefault(); 
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+            let newWidth = window.innerWidth - e.clientX;
+            
+            if (newWidth < 300) newWidth = 300; 
+            if (newWidth > window.innerWidth * 0.9) newWidth = window.innerWidth * 0.9;
+            
+            aiPanel.style.width = newWidth + 'px';
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = 'default';
+            }
+        });
         // Init
         window.addEventListener('DOMContentLoaded', () => {
             updateStackUI(); updateQueueUI(); switchTab('foundations');

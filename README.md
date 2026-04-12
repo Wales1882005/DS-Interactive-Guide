@@ -41,3 +41,20 @@ Because this application uses advanced API requests (CORS), it **cannot** be run
 1. **Clone the repository:**
    ```bash
    git clone [https://github.com/YourUsername/DS-Interactive-Guide.git](https://github.com/YourUsername/DS-Interactive-Guide.git)
+
+
+## Troubleshooting & Common API Issues
+
+If you are cloning this project or setting up your own Gemini API key, you might run into Google's strict serverless routing rules. Here are the fixes for the most common errors:
+
+**1. Vercel logs show `TypeError: Request with GET/HEAD method cannot have body`**
+* **The Cause:** The `fetch()` request is missing the POST declaration. By default, Vercel will attempt a `GET` request, which crashes instantly when trying to send chat data.
+* **The Fix:** Ensure `method: 'POST'` is explicitly defined inside the fetch options block.
+
+**2. Google API returns `404 Not Found` for the model name**
+* **The Cause:** Google frequently updates model access. Your specific API key might be locked to newer generation models (like `gemini-2.5-flash`) and will reject older model names (like `gemini-1.5-flash` or `gemini-pro`).
+* **The Fix:** Do not guess the model name. Open your browser and go to `https://generativelanguage.googleapis.com/v1beta/models?key=YOUR_API_KEY` to see the exact list of models your key is authorized to use, and update the backend code to match.
+
+**3. Google API returns `503 Service Unavailable`**
+* **The Cause:** Google's inference servers are experiencing a temporary high-demand spike. 
+* **The Fix:** This project implements a multi-model fallback loop. If the primary model returns a 503, the backend will automatically cycle to the next available model in the `MODEL_PRIORITY` array. If all models are overloaded, wait 60 seconds and try again.
