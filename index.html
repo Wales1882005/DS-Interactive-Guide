@@ -1048,13 +1048,18 @@
     showTypingIndicator();
 
    try {
-      // Securely calling your Netlify backend (which holds the secret key)
+     // 1. Grab the text of the currently visible section!
+      const activeSection = document.getElementById(`view-${state.activeTab}`);
+      const pageText = activeSection ? activeSection.innerText : "";
+
+      // 2. Securely call your Vercel backend and send the page text
       const response = await fetch('/api/tutor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           prompt: prompt,
-          context: document.getElementById('ai-context-label').innerText
+          context: document.getElementById('ai-context-label').innerText,
+          pageContent: pageText
         })
       });
 

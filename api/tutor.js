@@ -25,9 +25,11 @@ module.exports = async function(req, res) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-           contents: [{ 
-          parts: [{ text: `System: ${body.context || "You are an expert tutor."} Do NOT use LaTeX math formatting symbols like $ or \\to. Use standard plain text and ASCII arrows (->).\n\nUser: ${body.prompt}` }] 
-        }]
+            contents: [{ 
+              parts: [{ 
+                text: `System: ${body.context || "You are an expert tutor."}\nHere is the text of the lesson the user is currently reading on their screen:\n"""\n${body.pageContent || "No specific page content available."}\n"""\nUse this page text to help answer their questions if relevant. Do NOT use LaTeX math formatting symbols like $ or \\to. Use standard plain text and ASCII arrows (->).\n\nUser: ${body.prompt}` 
+              }] 
+            }]
           })
         });
 
