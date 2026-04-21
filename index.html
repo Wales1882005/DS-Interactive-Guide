@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.68/build/spline-viewer.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
    
     <style>
@@ -64,6 +65,80 @@
         .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
         .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
         @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
+        .nav-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+            padding: 0.6rem 0.75rem;
+            border-radius: 0.75rem;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+            text-align: left;
+            width: 100%;
+        }
+        .nav-card:hover { background-color: #f8fafc; border-color: #e2e8f0; }
+        .nav-card .nav-meta { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.04em; }
+        .nav-card .nav-title { font-size: 0.82rem; font-weight: 700; color: #0f172a; line-height: 1.2; }
+        .nav-card .nav-subtitle { font-size: 0.72rem; color: #64748b; line-height: 1.2; }
+        .nav-card.active-teal { background-color: #f0fdfa; border-color: #99f6e4; box-shadow: inset 3px 0 0 #0d9488; }
+        .nav-card.active-teal .nav-title { color: #0f766e; }
+        .nav-card.active-amber { background-color: #fffbeb; border-color: #fcd34d; box-shadow: inset 3px 0 0 #d97706; }
+        .nav-card.active-amber .nav-title { color: #b45309; }
+        .spotlight-card {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+        .spotlight-card::before {
+            content: "";
+            position: absolute;
+            inset: -20%;
+            background: radial-gradient(300px circle at var(--spotlight-x, 50%) var(--spotlight-y, 50%), rgba(250, 204, 21, 0.25), transparent 60%);
+            opacity: 0;
+            transition: opacity 0.25s ease;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .spotlight-card:hover::before { opacity: 1; }
+        .spotlight-content { position: relative; z-index: 1; }
+        .spline-frame spline-viewer { width: 100%; height: 100%; opacity: 0.7; }
+        .character-badge {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .character-badge-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.8rem 1rem;
+            border-radius: 0.9rem;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            box-shadow: 0 10px 28px rgba(2, 6, 23, 0.4);
+        }
+        .character-face {
+            font-size: 2.4rem;
+            line-height: 1;
+            filter: drop-shadow(0 4px 8px rgba(250, 204, 21, 0.35));
+        }
+        .character-name {
+            font-size: 0.72rem;
+            letter-spacing: 0.03em;
+            color: #cbd5e1;
+        }
+        .mini-chat-bubble {
+            border-radius: 0.8rem;
+            padding: 0.5rem 0.65rem;
+            font-size: 0.76rem;
+            line-height: 1.35;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen flex overflow-hidden selection:bg-teal-200 selection:text-teal-900">
@@ -73,22 +148,22 @@
             <span class="text-2xl text-teal-600 mr-2">&#9635;</span>
             <span class="font-bold text-lg tracking-tight">DS<span class="text-teal-600">Mastery</span></span>
         </div>
-        <nav class="flex-1 overflow-y-auto py-4 flex flex-col gap-1 px-3" id="nav-menu">
-            <button onclick="switchTab('foundations')" id="btn-foundations" class="text-left px-3 py-2 rounded-md text-sm font-medium transition-colors">1. Foundations & Arrays</button>
-            <button onclick="switchTab('linear')" id="btn-linear" class="text-left px-3 py-2 rounded-md text-sm font-medium transition-colors">2. Stacks & Queues</button>
-            <button onclick="switchTab('graphs')" id="btn-graphs" class="text-left px-3 py-2 rounded-md text-sm font-medium transition-colors">3. Graph Fundamentals</button>
-            <button onclick="switchTab('trees')" id="btn-trees" class="text-left px-3 py-2 rounded-md text-sm font-medium transition-colors">4. Tree Anatomy</button>
-            <button onclick="switchTab('traversals')" id="btn-traversals" class="text-left px-3 py-2 rounded-md text-sm font-medium transition-colors">5. Tree Traversals</button>
-            <button onclick="switchTab('spanning')" id="btn-spanning" class="text-left px-3 py-2 rounded-md text-sm font-medium transition-colors">6. Spanning & Parsing</button>
-            <button onclick="switchTab('searching')" id="btn-searching" class="text-left px-3 py-2 rounded-md text-sm font-medium transition-colors">7. Search Algorithms</button>
-            <button onclick="switchTab('practice')" id="btn-practice" class="text-left px-3 py-2 rounded-md text-sm font-medium transition-colors">8. Practice & Exams</button>
+        <nav class="flex-1 overflow-y-auto py-4 flex flex-col gap-2 px-3" id="nav-menu">
+            <button onclick="switchTab('foundations')" id="btn-foundations" class="nav-card"><span class="nav-meta">Module 1</span><span class="nav-title">Foundations & Arrays</span><span class="nav-subtitle">Core DS principles</span></button>
+            <button onclick="switchTab('linear')" id="btn-linear" class="nav-card"><span class="nav-meta">Module 2</span><span class="nav-title">Stacks & Queues</span><span class="nav-subtitle">LIFO and FIFO simulators</span></button>
+            <button onclick="switchTab('graphs')" id="btn-graphs" class="nav-card"><span class="nav-meta">Module 3</span><span class="nav-title">Graph Fundamentals</span><span class="nav-subtitle">Matrix + visual graph map</span></button>
+            <button onclick="switchTab('trees')" id="btn-trees" class="nav-card"><span class="nav-meta">Module 4</span><span class="nav-title">Tree Anatomy</span><span class="nav-subtitle">Terminology and highlights</span></button>
+            <button onclick="switchTab('traversals')" id="btn-traversals" class="nav-card"><span class="nav-meta">Module 5</span><span class="nav-title">Tree Traversals</span><span class="nav-subtitle">Animated node visit order</span></button>
+            <button onclick="switchTab('spanning')" id="btn-spanning" class="nav-card"><span class="nav-meta">Module 6</span><span class="nav-title">Spanning & Parsing</span><span class="nav-subtitle">MST and expression trees</span></button>
+            <button onclick="switchTab('searching')" id="btn-searching" class="nav-card"><span class="nav-meta">Module 7</span><span class="nav-title">Search Algorithms</span><span class="nav-subtitle">Step-by-step search visualizer</span></button>
+            <button onclick="switchTab('practice')" id="btn-practice" class="nav-card"><span class="nav-meta">Module 8</span><span class="nav-title">Practice & Exams</span><span class="nav-subtitle">Tracing drills and mock exam</span></button>
         </nav>
     </aside>
 
     <div class="flex-1 flex flex-col overflow-hidden relative">
         <header class="md:hidden h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 shrink-0 shadow-sm">
             <span class="font-bold text-lg tracking-tight">DS<span class="text-teal-600">Mastery</span></span>
-            <select id="mobile-nav" onchange="switchTab(this.value)" class="bg-slate-100 border border-slate-200 text-sm rounded-md p-2 outline-none">
+            <select id="mobile-nav" onchange="switchTab(this.value)" class="bg-slate-50 border border-slate-300 text-sm rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-teal-500">
                 <option value="foundations">1. Foundations & Arrays</option>
                 <option value="linear">2. Stacks & Queues</option>
                 <option value="graphs">3. Graph Fundamentals</option>
@@ -101,11 +176,63 @@
         </header>
 
         <main class="flex-1 overflow-y-auto p-4 sm:p-8" id="main-content">
+            <section class="max-w-5xl mx-auto mb-6">
+                <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4 flex flex-wrap gap-3 items-center justify-between">
+                    <div>
+                        <p class="text-xs uppercase tracking-wide text-slate-500">Learning Progress</p>
+                        <h2 class="text-sm sm:text-base font-semibold text-slate-800" id="progress-current-label">Current: Data Structure Foundations</h2>
+                    </div>
+                    <div class="flex gap-2 text-xs font-semibold">
+                        <span class="px-2.5 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200" id="progress-count-pill">Visited 1 / 8 modules</span>
+                        <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200">v1 Interactive Guide</span>
+                    </div>
+                </div>
+            </section>
 
             <section id="view-foundations" class="hidden fade-in max-w-5xl mx-auto">
                 <div class="mb-8">
                     <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">Data Structure Foundations</h1>
                     <p class="text-lg text-slate-600">This section introduces the core concepts of data organization and algorithms. A data structure is a way of collecting and organizing data to perform operations effectively.</p>
+                </div>
+
+                <div class="mb-8 spotlight-card rounded-2xl border border-slate-200 bg-slate-950 text-white shadow-lg" data-spotlight>
+                    <div class="spotlight-content grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 sm:p-8">
+                        <div class="flex flex-col justify-center">
+                            <span class="inline-flex w-fit px-2.5 py-1 text-[11px] uppercase tracking-wider rounded-full border border-amber-300/40 bg-amber-400/10 text-amber-300">3D Spotlight</span>
+                            <h2 class="mt-4 text-3xl sm:text-4xl font-extrabold bg-gradient-to-b from-white to-slate-300 bg-clip-text text-transparent">Interactive Study Experience</h2>
+                            <p class="mt-4 text-slate-300 text-sm sm:text-base max-w-xl">
+                                Explore an immersive learning canvas designed for Data Structures and Algorithms. This section combines responsive visuals, interactive simulators, and guided exercises to help students understand abstract concepts more clearly and practice them in a hands-on way.
+                            </p>
+                            <div class="mt-5 flex flex-wrap gap-2 text-xs">
+                                <span class="px-2.5 py-1 rounded-full border border-slate-600 bg-slate-800/80 text-slate-200">Responsive Layout</span>
+                                <span class="px-2.5 py-1 rounded-full border border-amber-300/30 bg-amber-500/10 text-amber-300">Glow Interaction</span>
+                                <span class="px-2.5 py-1 rounded-full border border-teal-300/30 bg-teal-500/10 text-teal-300">Spline Scene</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <div class="relative h-[320px] sm:h-[380px] lg:h-[310px] rounded-xl border border-slate-700 bg-slate-900/70 overflow-hidden spline-frame">
+                                <spline-viewer loading-anim-type="spinner-small-dark" url="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"></spline-viewer>
+                            </div>
+                            <div class="rounded-xl border border-slate-700/80 bg-slate-900/85 p-3">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="text-xs font-semibold tracking-wide uppercase text-slate-200">Ask Data Buddy</h3>
+                                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-200 border border-teal-300/20">Mini AI Chat</span>
+                                </div>
+                                <div id="mini-ai-chat" class="max-h-28 overflow-y-auto space-y-2 pr-1 mb-2">
+                                    <div class="mini-chat-bubble bg-slate-800 border border-slate-700 text-slate-200">Hi! Ask me anything about this section.</div>
+                                </div>
+                                <div class="flex flex-wrap gap-2 mb-2">
+                                    <button onclick="handleMiniAISubmit(null, 'Explain array indexing simply')" class="text-[11px] px-2 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700">Array indexing</button>
+                                    <button onclick="handleMiniAISubmit(null, 'Stack vs Queue in one minute')" class="text-[11px] px-2 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700">Stack vs Queue</button>
+                                    <button onclick="handleMiniAISubmit(null, 'Give me one quick practice question')" class="text-[11px] px-2 py-1 rounded-full bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700">Practice question</button>
+                                </div>
+                                <form onsubmit="handleMiniAISubmit(event)" class="flex gap-2">
+                                    <input id="mini-ai-input" type="text" class="flex-1 text-xs rounded-md border border-slate-700 bg-slate-950 text-slate-100 px-2 py-1.5 outline-none focus:border-amber-400" placeholder="Type a question...">
+                                    <button id="mini-ai-send" type="submit" class="text-xs px-3 py-1.5 rounded-md bg-amber-500 text-slate-950 font-semibold hover:bg-amber-400">Send</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -239,7 +366,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-[500px]">
                         <h3 class="text-lg font-semibold mb-4 border-b border-slate-100 pb-2">Visual Representation</h3>
                         <p class="text-sm text-slate-500 mb-4">A directed graph with 5 vertices (0-4). Edges represent one-way paths.</p>
                         <div class="chart-container bg-slate-50 rounded-lg flex items-center justify-center border border-slate-100">
@@ -254,6 +381,11 @@
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
                         <h3 class="text-lg font-semibold mb-4 border-b border-slate-100 pb-2">Adjacency Matrix</h3>
                         <p class="text-sm text-slate-500 mb-4">Hover over cells with '1' to highlight the corresponding edge on the graph.</p>
+                        <div class="flex flex-wrap gap-2 mb-4">
+                            <button onclick="toggleGraphArrows()" id="toggle-arrows-btn" class="px-3 py-1.5 rounded-full border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50">Hide Arrows</button>
+                            <button onclick="toggleGraphLabels()" id="toggle-labels-btn" class="px-3 py-1.5 rounded-full border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50">Hide Labels</button>
+                            <button onclick="resetGraphView()" class="px-3 py-1.5 rounded-full border border-slate-300 text-xs font-medium text-slate-700 hover:bg-slate-50">Reset Graph View</button>
+                        </div>
                         <div class="overflow-x-auto flex-1 flex items-center justify-center">
                             <table class="w-full text-center border-collapse text-sm">
                                 <thead>
@@ -262,6 +394,7 @@
                                 <tbody id="matrixBody"></tbody>
                             </table>
                         </div>
+                        <p id="matrix-helper" class="mt-3 text-xs text-slate-500">Hover matrix values to inspect directed links.</p>
                     </div>
                 </div>
 
@@ -277,6 +410,133 @@
                     </div>
                     <div id="ai-graph-loading" class="hidden mt-3 text-xs text-amber-600 font-medium flex items-center gap-2">
                         <span class="typing-indicator flex items-center"><span></span><span></span><span></span></span> Analyzing text and building graph structure...
+                    </div>
+                </div>
+
+                <div class="mt-8 p-6 bg-white rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Graph Exercise Set</h3>
+
+                    <div class="space-y-6">
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <h4 class="font-bold text-amber-700 mb-2">Exercise 1: Directed Graph + Adjacency Matrix</h4>
+                            <div class="mb-3 rounded-lg border border-slate-200 bg-white p-2 overflow-x-auto">
+                                <svg viewBox="0 0 360 180" class="w-full min-w-[320px] h-[170px]">
+                                    <defs>
+                                        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+                                            <path d="M0,0 L8,4 L0,8 z" fill="#334155"></path>
+                                        </marker>
+                                    </defs>
+                                    <line x1="35" y1="90" x2="95" y2="40" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"></line>
+                                    <line x1="35" y1="90" x2="95" y2="140" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"></line>
+                                    <line x1="95" y1="40" x2="95" y2="140" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"></line>
+                                    <line x1="95" y1="40" x2="190" y2="50" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"></line>
+                                    <line x1="95" y1="140" x2="190" y2="120" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"></line>
+                                    <line x1="190" y1="120" x2="190" y2="50" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"></line>
+                                    <g fill="#f8fafc" stroke="#334155" stroke-width="2">
+                                        <circle cx="25" cy="90" r="18"></circle>
+                                        <circle cx="105" cy="35" r="18"></circle>
+                                        <circle cx="105" cy="145" r="18"></circle>
+                                        <circle cx="200" cy="45" r="18"></circle>
+                                        <circle cx="200" cy="125" r="18"></circle>
+                                    </g>
+                                    <g fill="#0f172a" font-size="14" font-weight="700" text-anchor="middle" dominant-baseline="middle">
+                                        <text x="25" y="90">0</text>
+                                        <text x="105" y="35">1</text>
+                                        <text x="105" y="145">2</text>
+                                        <text x="200" y="45">4</text>
+                                        <text x="200" y="125">3</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            <ul class="list-disc pl-5 space-y-1 text-sm text-slate-700 mb-3">
+                                <li>List all vertices (nodes) in the graph.</li>
+                                <li>List all directed edges in the graph.</li>
+                                <li>Construct the adjacency matrix for the graph.</li>
+                            </ul>
+                            <button onclick="toggleExerciseAnswer('graph-ex1-answer', this)" class="text-xs font-semibold px-3 py-1.5 rounded border border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100 transition">
+                                Show Answer
+                            </button>
+                            <div id="graph-ex1-answer" class="hidden mt-3 rounded-lg border border-teal-200 bg-teal-50 p-3 text-xs text-slate-800 space-y-2">
+                                <p><strong>Vertices:</strong> V = {0, 1, 2, 3, 4}</p>
+                                <p><strong>Directed edges:</strong> E = {(0,1), (0,2), (1,2), (1,4), (2,3), (3,4)}</p>
+                                <div class="overflow-x-auto">
+                                    <table class="text-center border-collapse min-w-[260px]">
+                                        <thead>
+                                            <tr>
+                                                <th class="border border-teal-200 px-2 py-1 bg-white"></th>
+                                                <th class="border border-teal-200 px-2 py-1 bg-white">0</th>
+                                                <th class="border border-teal-200 px-2 py-1 bg-white">1</th>
+                                                <th class="border border-teal-200 px-2 py-1 bg-white">2</th>
+                                                <th class="border border-teal-200 px-2 py-1 bg-white">3</th>
+                                                <th class="border border-teal-200 px-2 py-1 bg-white">4</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><th class="border border-teal-200 px-2 py-1 bg-white">0</th><td class="border border-teal-200">0</td><td class="border border-teal-200">1</td><td class="border border-teal-200">1</td><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td></tr>
+                                            <tr><th class="border border-teal-200 px-2 py-1 bg-white">1</th><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">1</td><td class="border border-teal-200">0</td><td class="border border-teal-200">1</td></tr>
+                                            <tr><th class="border border-teal-200 px-2 py-1 bg-white">2</th><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">1</td><td class="border border-teal-200">0</td></tr>
+                                            <tr><th class="border border-teal-200 px-2 py-1 bg-white">3</th><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">1</td></tr>
+                                            <tr><th class="border border-teal-200 px-2 py-1 bg-white">4</th><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td><td class="border border-teal-200">0</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <h4 class="font-bold text-amber-700 mb-2">Exercise 2: Weighted Graph + Path Analysis</h4>
+                            <div class="mb-3 rounded-lg border border-slate-200 bg-white p-2 overflow-x-auto">
+                                <svg viewBox="0 0 380 180" class="w-full min-w-[330px] h-[170px]">
+                                    <line x1="60" y1="35" x2="160" y2="35" stroke="#94a3b8" stroke-width="2"></line>
+                                    <line x1="60" y1="35" x2="60" y2="125" stroke="#94a3b8" stroke-width="2"></line>
+                                    <line x1="60" y1="125" x2="160" y2="35" stroke="#cbd5e1" stroke-width="2"></line>
+                                    <line x1="160" y1="35" x2="160" y2="125" stroke="#94a3b8" stroke-width="2"></line>
+                                    <line x1="60" y1="125" x2="160" y2="125" stroke="#94a3b8" stroke-width="2"></line>
+                                    <line x1="160" y1="35" x2="250" y2="75" stroke="#94a3b8" stroke-width="2"></line>
+                                    <line x1="160" y1="125" x2="250" y2="75" stroke="#94a3b8" stroke-width="2"></line>
+                                    <g fill="#334155" font-size="11" font-weight="600">
+                                        <text x="108" y="28">6</text>
+                                        <text x="50" y="84">1</text>
+                                        <text x="106" y="82">2</text>
+                                        <text x="168" y="82">2</text>
+                                        <text x="108" y="140">1</text>
+                                        <text x="206" y="58">5</text>
+                                        <text x="206" y="112">5</text>
+                                    </g>
+                                    <g fill="#60a5fa" stroke="#3b82f6" stroke-width="2">
+                                        <circle cx="60" cy="35" r="12"></circle>
+                                        <circle cx="160" cy="35" r="12"></circle>
+                                        <circle cx="60" cy="125" r="12"></circle>
+                                        <circle cx="160" cy="125" r="12"></circle>
+                                        <circle cx="250" cy="75" r="12"></circle>
+                                    </g>
+                                    <g fill="#ffffff" font-size="12" font-weight="700" text-anchor="middle" dominant-baseline="middle">
+                                        <text x="60" y="35">A</text>
+                                        <text x="160" y="35">B</text>
+                                        <text x="60" y="125">D</text>
+                                        <text x="160" y="125">E</text>
+                                        <text x="250" y="75">C</text>
+                                    </g>
+                                </svg>
+                            </div>
+                            <ul class="list-disc pl-5 space-y-1 text-sm text-slate-700 mb-3">
+                                <li>List all vertices (nodes) in the graph.</li>
+                                <li>List all edges in the graph.</li>
+                                <li>Construct the adjacency matrix for the graph.</li>
+                                <li>Find the lightest weight path from <code>A</code> to <code>C</code>.</li>
+                                <li>Find the length of path <code>(A - D - B - E - C)</code>.</li>
+                            </ul>
+                            <button onclick="toggleExerciseAnswer('graph-ex2-answer', this)" class="text-xs font-semibold px-3 py-1.5 rounded border border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100 transition">
+                                Show Answer
+                            </button>
+                            <div id="graph-ex2-answer" class="hidden mt-3 rounded-lg border border-teal-200 bg-teal-50 p-3 text-xs text-slate-800 space-y-2">
+                                <p><strong>Vertices:</strong> V = {A, B, C, D, E}</p>
+                                <p><strong>Edges (weight):</strong> AB(6), AD(1), DB(2), BE(2), DE(1), BC(5), EC(5)</p>
+                                <p><strong>Lightest path A -&gt; C:</strong> A - D - E - C, total cost = 1 + 1 + 5 = <strong>7</strong></p>
+                                <p><strong>Length of path (A - D - B - E - C):</strong> 1 + 2 + 2 + 5 = <strong>10</strong></p>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </section>
@@ -317,6 +577,70 @@
                         </ul>
                     </div>
                 </div>
+
+                <div class="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Binary Search Tree (BST) Explanation</h3>
+                    <p class="text-sm text-slate-600 mb-5">
+                        A Binary Search Tree is a special type of binary tree where each node follows an ordering rule:
+                        all values in the left subtree are smaller than the current node, and all values in the right subtree are greater.
+                        This structure makes searching, insertion, and deletion efficient on average.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <h4 class="font-semibold text-teal-700 mb-2">BST Rule</h4>
+                            <ul class="list-disc pl-5 space-y-1 text-xs text-slate-700">
+                                <li>Left child &lt; Parent</li>
+                                <li>Right child &gt; Parent</li>
+                                <li>This rule applies recursively</li>
+                            </ul>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <h4 class="font-semibold text-amber-700 mb-2">Why It Matters</h4>
+                            <ul class="list-disc pl-5 space-y-1 text-xs text-slate-700">
+                                <li>Faster lookup than linear scan</li>
+                                <li>Keeps data ordered naturally</li>
+                                <li>Supports dynamic updates</li>
+                            </ul>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <h4 class="font-semibold text-indigo-700 mb-2">Traversal Tip</h4>
+                            <p class="text-xs text-slate-700">
+                                In-order traversal (Left, Node, Right) of a BST returns values in ascending order.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+                        <strong>Example:</strong> If the root is <code>50</code>, then <code>30</code> can be placed on the left and <code>70</code> on the right.
+                        If you insert <code>65</code>, it goes to the right subtree of <code>50</code>, then to the left of <code>70</code>.
+                    </div>
+
+                    <div class="mt-6 border-t border-slate-100 pt-6">
+                        <h4 class="font-bold text-slate-800 mb-3">Interactive BST Visualizer</h4>
+                        <p class="text-sm text-slate-600 mb-3">Enter random numbers separated by commas/spaces (example: <code>50, 30, 70, 20, 40, 60, 80</code>) and generate a Binary Search Tree.</p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <input id="bst-input" type="text" class="flex-1 min-w-[250px] border border-slate-300 rounded-lg px-3 py-2 text-sm outline-none focus:border-teal-500" placeholder="e.g. 50, 30, 70, 20, 40, 60, 80">
+                            <button onclick="buildBSTFromInput()" class="px-4 py-2 rounded-lg bg-teal-600 text-white text-sm font-medium hover:bg-teal-500 transition">Generate BST</button>
+                            <button onclick="resetBSTVisualizer()" class="px-4 py-2 rounded-lg bg-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-300 transition">Reset</button>
+                        </div>
+                        <p id="bst-status" class="text-xs text-slate-500 mb-3">Ready to build a tree.</p>
+                        <div class="bg-slate-50 rounded-lg border border-slate-200 p-3">
+                            <canvas id="bstCanvas" width="900" height="360" class="w-full h-[320px]"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 border-t border-slate-100 pt-6">
+                        <h4 class="font-bold text-amber-700 mb-3">Try This!</h4>
+                        <p class="text-sm text-slate-700 mb-3">Represent BST using the following list numbers:</p>
+                        <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-700">
+                            <li><code>23, 45, 12, 9, 89, 90, 67, 2, 13, 75</code></li>
+                            <li><code>9, 43, 76, 88, 12, 8, 3, 4, 90, 10</code></li>
+                            <li><code>80, 50, 20, 10, 30, 40, 60, 70</code></li>
+                        </ol>
+                        <p class="text-xs text-slate-500 mt-3">Tip: Paste one list into the BST visualizer input above and click <strong>Generate BST</strong>.</p>
+                    </div>
+                </div>
             </section>
 
             <section id="view-traversals" class="hidden fade-in max-w-5xl mx-auto">
@@ -331,7 +655,12 @@
                         <button onclick="runTraversal('PRE')" class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-500 transition font-medium text-sm">Pre-Order (NLR)</button>
                         <button onclick="runTraversal('IN')" class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-500 transition font-medium text-sm">In-Order (LNR)</button>
                         <button onclick="runTraversal('POST')" class="px-4 py-2 bg-amber-600 text-white rounded-md hover:bg-amber-500 transition font-medium text-sm">Post-Order (LRN)</button>
-                        <button onclick="resetTraversal()" class="px-4 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition font-medium text-sm ml-auto">Reset</button>
+                        <div class="ml-auto flex flex-wrap gap-2">
+                            <button onclick="playTraversal()" id="traversal-play-btn" class="px-3 py-2 bg-teal-600 text-white rounded-md hover:bg-teal-500 transition font-medium text-sm">Play</button>
+                            <button onclick="pauseTraversal()" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition font-medium text-sm">Pause</button>
+                            <button onclick="nextTraversalStep()" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition font-medium text-sm">Next Step</button>
+                            <button onclick="resetTraversal()" class="px-3 py-2 bg-slate-200 text-slate-700 rounded-md hover:bg-slate-300 transition font-medium text-sm">Reset</button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -340,7 +669,10 @@
                         </div>
                         
                         <div class="flex flex-col">
-                            <h3 class="font-semibold text-slate-800 mb-3" id="traversalTitle">Traversal Order</h3>
+                            <div class="flex justify-between items-center mb-3">
+                                <h3 class="font-semibold text-slate-800" id="traversalTitle">Traversal Order</h3>
+                                <span id="traversal-progress" class="text-xs px-2 py-1 rounded bg-slate-100 border border-slate-200 text-slate-600">0 / 0</span>
+                            </div>
                             <div class="bg-slate-50 p-4 rounded border border-slate-200 flex-1 overflow-y-auto">
                                 <ul id="traversalList" class="flex flex-wrap gap-2"></ul>
                             </div>
@@ -356,6 +688,37 @@
                 <div class="mb-8">
                     <h2 class="text-3xl font-bold text-slate-900 mb-2">Expression Parsing & Spanning Trees</h2>
                     <p class="text-lg text-slate-600 leading-relaxed">This section details how arithmetic expressions are represented and evaluated by computers using Stacks and Expression Trees, as well as the concept of Spanning Trees.</p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">How Infix, Prefix, and Postfix Work</h2>
+                    <p class="text-sm text-slate-600 mb-5">
+                        Expression parsing is the process of converting and evaluating arithmetic expressions in a format that computers can process efficiently.
+                        Infix is human-friendly, while Prefix and Postfix are easier for machines and stack-based evaluation.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <h3 class="font-semibold text-teal-700 mb-2">Infix</h3>
+                            <p class="text-xs text-slate-600 mb-2">Operator is placed <strong>between</strong> operands.</p>
+                            <code class="text-xs bg-white border border-slate-200 rounded px-2 py-1 inline-block">A + B * C</code>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <h3 class="font-semibold text-amber-700 mb-2">Prefix (Polish)</h3>
+                            <p class="text-xs text-slate-600 mb-2">Operator is placed <strong>before</strong> operands.</p>
+                            <code class="text-xs bg-white border border-slate-200 rounded px-2 py-1 inline-block">+ A * B C</code>
+                        </div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <h3 class="font-semibold text-indigo-700 mb-2">Postfix (Reverse Polish)</h3>
+                            <p class="text-xs text-slate-600 mb-2">Operator is placed <strong>after</strong> operands.</p>
+                            <code class="text-xs bg-white border border-slate-200 rounded px-2 py-1 inline-block">A B C * +</code>
+                        </div>
+                    </div>
+
+                    <div class="rounded-lg border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900">
+                        <strong>Why Postfix is common in stacks:</strong> Postfix removes the need for parentheses and operator precedence checks during evaluation.
+                        You can process tokens from left to right using a stack: push operands, pop/apply on operators, then push result.
+                    </div>
                 </div>
 
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
@@ -386,33 +749,120 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col min-h-[680px]">
+                        <h3 class="text-lg font-semibold mb-4 border-b border-slate-100 pb-2">3D Interactive Expression Tree Generator</h3>
+                        <p class="text-sm text-slate-500 mb-3">Enter an infix expression, then generate a tree with layered 3D-style nodes.</p>
+                        <div class="flex flex-wrap gap-2 mb-3">
+                            <input id="expr-input" type="text" value="3 + ((5 + 9) * 2)" class="flex-1 min-w-[220px] border border-slate-300 rounded px-3 py-2 text-sm outline-none focus:border-teal-500" placeholder="e.g. (A+B)*(C-D)">
+                            <button onclick="generateExpressionTree()" class="px-3 py-2 bg-teal-600 text-white rounded text-xs font-semibold hover:bg-teal-500 transition">Generate</button>
+                            <button onclick="resetExpressionTree()" class="px-3 py-2 bg-slate-200 text-slate-700 rounded text-xs font-semibold hover:bg-slate-300 transition">Reset</button>
+                        </div>
+                        <p id="expr-status" class="text-xs text-slate-500 mb-2">Ready to generate tree.</p>
+                        <div class="h-[520px] bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center p-2">
+                            <canvas id="exprCanvas" width="900" height="520" class="w-full h-full object-contain"></canvas>
+                        </div>
+                    </div>
+
                     <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col">
                         <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
                             <h3 class="text-lg font-semibold">Spanning Tree Extractor</h3>
                             <button onclick="toggleSpanning()" id="spanBtn" class="px-3 py-1 bg-amber-600 text-white text-xs rounded hover:bg-amber-500 transition">Show Minimum Spanning</button>
                         </div>
                         <p class="text-sm text-slate-500 mb-4">A subset of a graph that has all vertices covered with minimum possible edges and no cycles.</p>
-                        <div class="chart-container bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center p-4">
+                        <div class="flex-1 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center p-4">
                             <canvas id="spanningCanvas" width="400" height="300" class="w-full h-full object-contain"></canvas>
                         </div>
                     </div>
 
-                    <div class="flex flex-col gap-8">
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-1/2">
-                            <h3 class="text-lg font-semibold mb-4 border-b border-slate-100 pb-2">Expression Tree</h3>
-                            <p class="text-sm text-slate-500 mb-2">For formula: <code class="font-mono bg-slate-100 px-1 rounded">3 + ((5 + 9) * 2)</code></p>
-                            <div class="flex-1 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center p-2">
-                                <canvas id="exprCanvas" width="300" height="200" class="w-full h-full object-contain"></canvas>
-                            </div>
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-[500px]">
+                        <h3 class="text-lg font-semibold mb-4 border-b border-slate-100 pb-2">Complexity: n<sup>n-2</sup></h3>
+                        <p class="text-xs text-slate-500 mb-4">Maximum spanning trees for a complete undirected graph of 'n' nodes.</p>
+                        <div class="flex-1 bg-slate-50 rounded-lg border border-slate-100 p-3">
+                            <canvas id="barChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mt-8 mb-8">
+                    <h2 class="text-xl font-bold text-slate-800 mb-6">Extra Exercises</h2>
+
+                    <div class="mb-8">
+                        <h3 class="font-bold text-amber-700 mb-2">Extra Exercise 1</h3>
+                        <p class="text-sm text-slate-700 mb-3">Transform the following INFIX expression to a PREFIX expression.</p>
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-slate-600">
+                            <li>(a) <code>(X + Y * (Z - W))</code></li>
+                            <li>(b) <code>((A + B) * (C - D) / E)</code></li>
+                            <li>(c) <code>(P - Q / R + S * T)</code></li>
+                            <li>(d) <code>((A + B * C) - (D / E + F))</code></li>
+                        </ul>
+                        <button onclick="toggleExerciseAnswer('prefix-extra-answer', this)" class="mt-3 text-xs font-semibold px-3 py-1.5 rounded border border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100 transition">
+                            Show Answer
+                        </button>
+                        <div id="prefix-extra-answer" class="hidden mt-3 rounded-lg border border-teal-200 bg-teal-50 p-3 text-xs text-slate-800 space-y-1">
+                            <p><strong>(a)</strong> <code>+ X * Y - Z W</code></p>
+                            <p><strong>(b)</strong> <code>/ * + A B - C D E</code></p>
+                            <p><strong>(c)</strong> <code>+ - P / Q R * S T</code></p>
+                            <p><strong>(d)</strong> <code>- + A * B C + / D E F</code></p>
+                        </div>
+                    </div>
+
+                    <div class="mb-8 border-t border-slate-100 pt-6">
+                        <h3 class="font-bold text-amber-700 mb-2">Extra Exercise 2</h3>
+                        <p class="text-sm text-slate-700 mb-3">Transform the following INFIX expression to a POSTFIX expression.</p>
+                        <ul class="list-disc pl-5 space-y-2 text-sm text-slate-600">
+                            <li>(a) <code>((A + B * C) - (D / E + F))</code></li>
+                            <li>(b) <code>(X * (Y + Z) / (W - V) + U)</code></li>
+                            <li>(c) <code>((A + B) * (C - D / E) + F * (G + H))</code></li>
+                            <li>(d) <code>(P - Q / R + S * T)</code></li>
+                        </ul>
+                        <button onclick="toggleExerciseAnswer('postfix-extra-answer', this)" class="mt-3 text-xs font-semibold px-3 py-1.5 rounded border border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100 transition">
+                            Show Answer
+                        </button>
+                        <div id="postfix-extra-answer" class="hidden mt-3 rounded-lg border border-teal-200 bg-teal-50 p-3 text-xs text-slate-800 space-y-1">
+                            <p><strong>(a)</strong> <code>A B C * + D E / F + -</code></p>
+                            <p><strong>(b)</strong> <code>X Y Z + * W V - / U +</code></p>
+                            <p><strong>(c)</strong> <code>A B + C D E / - * F G H + * +</code></p>
+                            <p><strong>(d)</strong> <code>P Q R / - S T * +</code></p>
+                        </div>
+                    </div>
+
+                    <div class="border-t border-slate-100 pt-6">
+                        <h3 class="font-bold text-amber-700 mb-2">Extra Exercise 3</h3>
+                        <p class="text-sm text-slate-700 mb-3">The following is an illustration of Postfix Evaluation Algorithms using stacks.</p>
+                        <p class="text-sm text-slate-700 mb-3"><strong>(a)</strong> <code>5 3 2 * + 11 220 / - 2 ^ 6 + 3 *</code></p>
+                        <div class="flex items-center gap-3">
+                            <button onclick="toggleExerciseAnswer('exercise3-answer', this)" class="text-xs font-semibold px-3 py-1.5 rounded border border-teal-300 text-teal-700 bg-teal-50 hover:bg-teal-100 transition">
+                                Show Answer
+                            </button>
+                            <p id="exercise3-answer" class="hidden inline-block text-sm font-semibold text-teal-800 bg-teal-50 border border-teal-200 rounded px-3 py-1">Answer: 1554</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                    <h2 class="text-xl font-bold text-slate-800 mb-2">Expression Tree Exercises</h2>
+                    <p class="text-sm text-slate-600 mb-5">Draw an expression tree for each expression below. Break each expression by operator precedence and parentheses before drawing.</p>
+
+                    <div class="space-y-4 text-sm text-slate-700">
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <p class="font-semibold text-amber-700 mb-2">Exercise A</p>
+                            <p><code>76 / 2 + (21 - 14 + 10) * (13 ^ 3 + 49 / 7) - 99 * 5</code></p>
                         </div>
 
-                        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 flex flex-col h-1/2">
-                            <h3 class="text-lg font-semibold mb-2 border-b border-slate-100 pb-2">Complexity: n<sup>n-2</sup></h3>
-                            <p class="text-xs text-slate-500 mb-4">Maximum spanning trees for a complete undirected graph of 'n' nodes.</p>
-                            <div class="chart-container flex-1">
-                                <canvas id="barChart"></canvas>
-                            </div>
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <p class="font-semibold text-amber-700 mb-2">Exercise B</p>
+                            <p><code>(3 + 4 ^ (15 * 6)) - 14 / 3 + 65 * 5</code></p>
+                        </div>
+
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <p class="font-semibold text-amber-700 mb-2">Exercise C</p>
+                            <p><code>3 * (7 + 1) / 4 + (17 - 5)</code></p>
+                        </div>
+
+                        <div class="rounded-lg border border-slate-200 bg-slate-50 p-4">
+                            <p class="font-semibold text-amber-700 mb-2">Exercise D</p>
+                            <p><code>X = (-b + (b^2 - 4 * a * c) ^ 0.5) / (2 * a)</code></p>
                         </div>
                     </div>
                 </div>
@@ -436,11 +886,23 @@
                             <input type="number" id="search-target" value="23" onchange="resetSearch()" class="w-20 border border-slate-300 rounded px-3 py-1.5 text-sm outline-none focus:border-teal-500">
                         </div>
                         <button onclick="stepSearch()" class="bg-teal-600 hover:bg-teal-700 text-white px-6 py-1.5 rounded text-sm font-medium transition-colors ml-auto shadow-sm">Step Forward</button>
+                        <button onclick="playSearch()" id="search-play-btn" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-1.5 rounded text-sm font-medium transition-colors shadow-sm">Play</button>
+                        <button onclick="pauseSearch()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-1.5 rounded text-sm font-medium transition-colors shadow-sm">Pause</button>
+                        <select id="search-speed" class="border border-slate-300 rounded px-2 py-1.5 text-xs outline-none focus:border-teal-500">
+                            <option value="1200">0.5x</option>
+                            <option value="700" selected>1x</option>
+                            <option value="350">2x</option>
+                        </select>
                         <button onclick="resetSearch()" class="bg-slate-200 hover:bg-slate-300 text-slate-800 px-4 py-1.5 rounded text-sm font-medium transition-colors shadow-sm">Reset</button>
                     </div>
                     
                     <div class="flex-1 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-center p-4">
                         <canvas id="searchCanvas" width="600" height="150" class="w-full object-contain"></canvas>
+                    </div>
+                    <div class="mt-3 flex flex-wrap gap-2 text-xs">
+                        <span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200">Current probe</span>
+                        <span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-700 border border-slate-300">Eliminated range</span>
+                        <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">Found target</span>
                     </div>
                     
                     <div id="search-log" class="mt-4 p-4 bg-teal-50 border border-teal-200 rounded text-sm text-teal-900 font-mono font-medium shadow-inner">
@@ -588,10 +1050,10 @@
                 </button>
             </div>
             
-           <div id="ai-chat" class="flex-1 overflow-y-auto p-4 space-y-4 text-sm bg-white">
+           <div id="ai-chat" class="flex-1 overflow-y-auto p-4 space-y-4 text-sm bg-gradient-to-b from-white to-slate-50">
                 <div class="flex flex-col gap-1">
                     <span class="text-xs text-slate-400 ml-1">AI Tutor</span>
-                    <div class="bg-slate-100 p-3 rounded-2xl rounded-tl-sm text-slate-700 shadow-sm border border-slate-200 prose prose-sm max-w-none">
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-sm text-slate-700 shadow-sm border border-slate-200 prose prose-sm max-w-none">
                         Hi! I'm powered by Gemini 3 Flash. I can explain complex data structures or provide real-world analogies. How can I help you with <strong id="ai-context-label">Foundations</strong>?
                         
                         <div class="mt-3 flex gap-2 items-start bg-amber-50 border border-amber-200 rounded p-2 text-amber-800 text-xs shadow-inner">
@@ -605,7 +1067,7 @@
             <div class="p-3 bg-slate-50 border-t border-slate-200 overflow-x-auto whitespace-nowrap shadow-inner" id="ai-suggestions">
                 </div>
 
-            <div class="p-4 bg-white border-t border-slate-200">
+            <div class="p-4 bg-white border-t border-slate-200 shadow-[0_-4px_14px_rgba(15,23,42,0.06)]">
                 <form id="ai-form" class="flex gap-2" onsubmit="handleAISubmit(event)">
                     <input type="text" id="ai-input" class="flex-1 border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500" placeholder="Ask about the current page..." autocomplete="off">
                     <button type="submit" id="ai-submit-btn" class="bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-500 transition shadow-sm font-medium disabled:opacity-50">Send</button>
@@ -621,11 +1083,17 @@
         const state = {
             activeTab: 'foundations',
             highlightedEdge: null,
+            matrixHover: null,
             treeHighlight: 'none',
             traversalNodes: [],
             traversalIndex: 0,
             traversalTimer: null,
-            showSpanning: false
+            traversalType: null,
+            showSpanning: false,
+            showGraphArrows: true,
+            showGraphLabels: true,
+            visitedTabs: new Set(['foundations']),
+            searchTimer: null
         };
 
         const tabLabels = {
@@ -641,6 +1109,7 @@
 
         function switchTab(activeTab) {
             state.activeTab = activeTab;
+            state.visitedTabs.add(activeTab);
             
             // Handle Views
             tabs.forEach(tab => {
@@ -656,24 +1125,32 @@
 
             // Handle Sidebar Styles
             document.querySelectorAll('aside nav button').forEach(el => {
-                el.className = "text-left px-3 py-2 rounded-md text-sm font-medium transition-colors text-slate-600 hover:bg-slate-50";
+                el.className = "nav-card";
             });
             const activeBtn = document.getElementById(`btn-${activeTab}`);
             if (activeBtn) {
                 // Apply specific theme coloring based on module logic
                 if (['foundations', 'linear', 'searching', 'practice'].includes(activeTab)) {
-                    activeBtn.className = "text-left px-3 py-2 rounded-md text-sm font-medium transition-colors bg-teal-50 text-teal-700";
+                    activeBtn.classList.add('active-teal');
                 } else {
-                    activeBtn.className = "text-left px-3 py-2 rounded-md text-sm font-medium transition-colors bg-amber-50 text-amber-700 border-r-4 border-amber-600";
+                    activeBtn.classList.add('active-amber');
                 }
             }
             
             // Sync Mobile Dropdown
             document.getElementById('mobile-nav').value = activeTab;
+            updateProgressUI();
 
             // Trigger specific rendering based on active tab
             renderAll();
             updateAISuggestions(activeTab);
+        }
+
+        function updateProgressUI() {
+            const labelEl = document.getElementById('progress-current-label');
+            const countEl = document.getElementById('progress-count-pill');
+            if (labelEl) labelEl.innerText = `Current: ${tabLabels[state.activeTab] || state.activeTab}`;
+            if (countEl) countEl.innerText = `Visited ${state.visitedTabs.size} / ${tabs.length} modules`;
         }
 
         // --- Stack & Queue Simulators ---
@@ -777,14 +1254,20 @@
         function renderGraphSection() {
             if(state.activeTab !== 'graphs') return;
             const canvas = document.getElementById('graphCanvas');
+            if (!canvas) return;
             const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             gEdges.forEach(e => {
                 const n1 = gNodes[e.from]; const n2 = gNodes[e.to];
                 const isHigh = state.highlightedEdge && state.highlightedEdge.from === e.from && state.highlightedEdge.to === e.to;
-                drawDirectedEdge(ctx, n1.x, n1.y, n2.x, n2.y, isHigh ? '#f59e0b' : '#cbd5e1', isHigh ? 4 : 2);
+                if (state.showGraphArrows) {
+                    drawDirectedEdge(ctx, n1.x, n1.y, n2.x, n2.y, isHigh ? '#f59e0b' : '#cbd5e1', isHigh ? 4 : 2);
+                } else {
+                    ctx.beginPath(); ctx.moveTo(n1.x, n1.y); ctx.lineTo(n2.x, n2.y);
+                    ctx.strokeStyle = isHigh ? '#f59e0b' : '#cbd5e1'; ctx.lineWidth = isHigh ? 4 : 2; ctx.stroke();
+                }
             });
-            gNodes.forEach(n => drawNode(ctx, n.x, n.y, n.id, '#ffffff', '#64748b', '#0f172a'));
+            gNodes.forEach(n => drawNode(ctx, n.x, n.y, state.showGraphLabels ? n.id : '', '#ffffff', '#64748b', '#0f172a'));
 
             const theadTr = document.getElementById('matrixHeadRow');
             if (theadTr) {
@@ -792,20 +1275,58 @@
                     gNodes.map(n => `<th class="p-3 border border-slate-200 font-medium">${n.id}</th>`).join('');
             }
 
-            const tbody = document.getElementById('matrixBody'); tbody.innerHTML = '';
+            const tbody = document.getElementById('matrixBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
             for(let r=0; r<gNodes.length; r++) {
                 let rowHtml = `<td class="p-3 border border-slate-200 font-medium bg-slate-100 text-slate-600">${gNodes[r].id}</td>`;
                 for(let c=0; c<gNodes.length; c++) {
                     const hasEdge = gEdges.some(e => e.from === r && e.to === c);
                     const val = hasEdge ? 1 : 0;
+                    const isAxis = state.matrixHover && (state.matrixHover.row === r || state.matrixHover.col === c);
                     const cellClass = hasEdge ? 'matrix-cell bg-white text-slate-900 font-bold' : 'bg-slate-50 text-slate-400';
-                    rowHtml += `<td class="p-3 border border-slate-200 ${cellClass}" onmouseover="hiEdge(${r},${c},${hasEdge})" onmouseout="hiEdge(null,null,false)">${val}</td>`;
+                    const axisClass = isAxis ? 'ring-1 ring-amber-200 bg-amber-50/60' : '';
+                    rowHtml += `<td class="p-3 border border-slate-200 ${cellClass} ${axisClass}" onmouseover="hiEdge(${r},${c},${hasEdge})" onmouseout="hiEdge(null,null,false)">${val}</td>`;
                 }
                 tbody.innerHTML += `<tr>${rowHtml}</tr>`;
             }
         }
 
-        function hiEdge(f, t, valid) { state.highlightedEdge = valid ? {from: f, to: t} : null; renderGraphSection(); }
+        function hiEdge(f, t, valid) {
+            state.highlightedEdge = valid ? {from: f, to: t} : null;
+            state.matrixHover = (f !== null && t !== null) ? {row: f, col: t} : null;
+            const helper = document.getElementById('matrix-helper');
+            if (helper) helper.innerText = valid ? `Highlighted edge: ${gNodes[f].id} -> ${gNodes[t].id}` : 'Hover matrix values to inspect directed links.';
+            renderGraphSection();
+        }
+
+        function toggleGraphArrows() {
+            state.showGraphArrows = !state.showGraphArrows;
+            const btn = document.getElementById('toggle-arrows-btn');
+            if (btn) btn.innerText = state.showGraphArrows ? 'Hide Arrows' : 'Show Arrows';
+            renderGraphSection();
+        }
+
+        function toggleGraphLabels() {
+            state.showGraphLabels = !state.showGraphLabels;
+            const btn = document.getElementById('toggle-labels-btn');
+            if (btn) btn.innerText = state.showGraphLabels ? 'Hide Labels' : 'Show Labels';
+            renderGraphSection();
+        }
+
+        function resetGraphView() {
+            state.highlightedEdge = null;
+            state.matrixHover = null;
+            state.showGraphArrows = true;
+            state.showGraphLabels = true;
+            const helper = document.getElementById('matrix-helper');
+            const arrowsBtn = document.getElementById('toggle-arrows-btn');
+            const labelsBtn = document.getElementById('toggle-labels-btn');
+            if (helper) helper.innerText = 'Hover matrix values to inspect directed links.';
+            if (arrowsBtn) arrowsBtn.innerText = 'Hide Arrows';
+            if (labelsBtn) labelsBtn.innerText = 'Hide Labels';
+            renderGraphSection();
+        }
 
         // --- Tree Functions ---
         const tNodes = [
@@ -813,11 +1334,14 @@
             { id: 'D', x: 75, y: 250, isLeaf: true }, { id: 'E', x: 225, y: 250, isLeaf: true }, { id: 'F', x: 375, y: 250, isLeaf: true }, { id: 'G', x: 525, y: 250, isLeaf: true }
         ];
         const tEdges = [ { from: 0, to: 1 }, { from: 0, to: 2 }, { from: 1, to: 3 }, { from: 1, to: 4 }, { from: 2, to: 5 }, { from: 2, to: 6 } ];
+        let bstRoot = null;
 
         function highlightTree(type) { state.treeHighlight = type; renderTreeSection(); }
         function renderTreeSection() {
             if(state.activeTab !== 'trees') return;
-            const canvas = document.getElementById('treeCanvas'); const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const canvas = document.getElementById('treeCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
             
             if(state.treeHighlight === 'subtree') {
                 ctx.beginPath(); ctx.moveTo(150, 110); ctx.lineTo(40, 290); ctx.lineTo(260, 290); ctx.closePath();
@@ -836,6 +1360,122 @@
             });
         }
 
+        function insertBST(node, value) {
+            if (!node) return { value, left: null, right: null, x: 0, y: 0 };
+            if (value < node.value) node.left = insertBST(node.left, value);
+            else if (value > node.value) node.right = insertBST(node.right, value);
+            return node;
+        }
+
+        function assignBSTPositions(root, canvasWidth) {
+            let order = 0;
+            const xPadding = 40;
+            const yStart = 50;
+            const yGap = 70;
+
+            function walk(node, depth) {
+                if (!node) return;
+                walk(node.left, depth + 1);
+                order += 1;
+                node.x = xPadding + (order * (canvasWidth - 2 * xPadding)) / Math.max(2, countBSTNodes(root) + 1);
+                node.y = yStart + depth * yGap;
+                walk(node.right, depth + 1);
+            }
+            walk(root, 0);
+        }
+
+        function countBSTNodes(node) {
+            if (!node) return 0;
+            return 1 + countBSTNodes(node.left) + countBSTNodes(node.right);
+        }
+
+        function drawBSTEdges(ctx, node) {
+            if (!node) return;
+            if (node.left) {
+                ctx.beginPath(); ctx.moveTo(node.x, node.y); ctx.lineTo(node.left.x, node.left.y);
+                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
+                drawBSTEdges(ctx, node.left);
+            }
+            if (node.right) {
+                ctx.beginPath(); ctx.moveTo(node.x, node.y); ctx.lineTo(node.right.x, node.right.y);
+                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
+                drawBSTEdges(ctx, node.right);
+            }
+        }
+
+        function drawBSTNodes(ctx, node) {
+            if (!node) return;
+            drawNode(ctx, node.x, node.y, String(node.value), '#ffffff', '#0f766e', '#0f172a');
+            drawBSTNodes(ctx, node.left);
+            drawBSTNodes(ctx, node.right);
+        }
+
+        function renderBSTCanvas() {
+            if (state.activeTab !== 'trees') return;
+            const canvas = document.getElementById('bstCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!bstRoot) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '14px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Enter values and click "Generate BST" to visualize.', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            assignBSTPositions(bstRoot, canvas.width);
+            drawBSTEdges(ctx, bstRoot);
+            drawBSTNodes(ctx, bstRoot);
+        }
+
+        function buildBSTFromInput() {
+            const input = document.getElementById('bst-input');
+            const status = document.getElementById('bst-status');
+            if (!input || !status) return;
+
+            const raw = input.value.trim();
+            if (!raw) {
+                status.innerText = 'Please enter numbers first.';
+                status.className = 'text-xs text-red-600 mb-3';
+                bstRoot = null;
+                renderBSTCanvas();
+                return;
+            }
+
+            const nums = raw
+                .split(/[\s,]+/)
+                .map(v => parseInt(v, 10))
+                .filter(v => !Number.isNaN(v));
+
+            if (!nums.length) {
+                status.innerText = 'No valid numbers found. Use format like: 50, 30, 70';
+                status.className = 'text-xs text-red-600 mb-3';
+                bstRoot = null;
+                renderBSTCanvas();
+                return;
+            }
+
+            bstRoot = null;
+            nums.forEach(v => { bstRoot = insertBST(bstRoot, v); });
+            status.innerText = `BST generated with ${countBSTNodes(bstRoot)} unique node(s).`;
+            status.className = 'text-xs text-teal-700 mb-3';
+            renderBSTCanvas();
+        }
+
+        function resetBSTVisualizer() {
+            const input = document.getElementById('bst-input');
+            const status = document.getElementById('bst-status');
+            if (input) input.value = '';
+            if (status) {
+                status.innerText = 'Ready to build a tree.';
+                status.className = 'text-xs text-slate-500 mb-3';
+            }
+            bstRoot = null;
+            renderBSTCanvas();
+        }
+
         // --- Traversals Functions ---
         const trNodes = [
             { id: '10', x: 350, y: 50 }, { id: '11', x: 200, y: 150 }, { id: '12', x: 500, y: 150 },
@@ -849,33 +1489,83 @@
             'POST':{ desc: "Post-Order (LRN): Left child, then Right child, Root visited last.", path: [3,4,1,5,6,2,0] }
         };
 
+        function renderTraversalList() {
+            const ul = document.getElementById('traversalList');
+            const progressEl = document.getElementById('traversal-progress');
+            if (!ul) return;
+            ul.innerHTML = '';
+            const visited = state.traversalNodes.slice(0, state.traversalIndex);
+            visited.forEach(nodeIdx => {
+                const li = document.createElement('li');
+                li.className = "px-2 py-1 bg-amber-100 text-amber-800 rounded font-mono text-sm border border-amber-200 fade-in";
+                li.innerText = trNodes[nodeIdx].id;
+                ul.appendChild(li);
+            });
+            if (progressEl) progressEl.innerText = `${state.traversalIndex} / ${state.traversalNodes.length}`;
+        }
+
         function resetTraversal() {
-            clearTimeout(state.traversalTimer); state.traversalNodes = []; state.traversalIndex = 0;
-            document.getElementById('traversalList').innerHTML = ''; document.getElementById('traversalDesc').innerHTML = 'Select a traversal method above...';
+            clearTimeout(state.traversalTimer);
+            state.traversalTimer = null;
+            state.traversalNodes = [];
+            state.traversalIndex = 0;
+            state.traversalType = null;
+            const desc = document.getElementById('traversalDesc');
+            if (desc) desc.innerHTML = 'Select a traversal method above to start the animation.';
+            renderTraversalList();
             renderTraversalCanvas();
         }
 
         function runTraversal(type) {
-            resetTraversal(); const data = traversalsData[type]; state.traversalNodes = data.path;
-            document.getElementById('traversalDesc').innerHTML = `<strong>${type}:</strong> ${data.desc}`;
-            animateTraversal();
+            clearTimeout(state.traversalTimer);
+            state.traversalTimer = null;
+            const data = traversalsData[type];
+            state.traversalType = type;
+            state.traversalNodes = data.path.slice();
+            state.traversalIndex = 0;
+            const desc = document.getElementById('traversalDesc');
+            if (desc) desc.innerHTML = `<strong>${type}:</strong> ${data.desc}`;
+            renderTraversalList();
+            renderTraversalCanvas();
+            playTraversal();
+        }
+
+        function nextTraversalStep() {
+            if (!state.traversalNodes.length) return;
+            if (state.traversalIndex < state.traversalNodes.length) {
+                state.traversalIndex++;
+                renderTraversalList();
+                renderTraversalCanvas();
+            } else {
+                pauseTraversal();
+            }
         }
 
         function animateTraversal() {
-            renderTraversalCanvas(); const ul = document.getElementById('traversalList');
-            if (state.traversalIndex > 0) {
-                const nodeIdx = state.traversalNodes[state.traversalIndex - 1]; const li = document.createElement('li');
-                li.className = "px-2 py-1 bg-amber-100 text-amber-800 rounded font-mono text-sm border border-amber-200 fade-in";
-                li.innerText = trNodes[nodeIdx].id; ul.appendChild(li);
-            }
+            nextTraversalStep();
             if (state.traversalIndex < state.traversalNodes.length) {
-                state.traversalIndex++; state.traversalTimer = setTimeout(animateTraversal, 800);
+                state.traversalTimer = setTimeout(animateTraversal, 800);
+            } else {
+                state.traversalTimer = null;
             }
+        }
+
+        function playTraversal() {
+            if (!state.traversalNodes.length) return;
+            if (state.traversalTimer) return;
+            state.traversalTimer = setTimeout(animateTraversal, 200);
+        }
+
+        function pauseTraversal() {
+            clearTimeout(state.traversalTimer);
+            state.traversalTimer = null;
         }
 
         function renderTraversalCanvas() {
             if(state.activeTab !== 'traversals') return;
-            const canvas = document.getElementById('traversalCanvas'); const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const canvas = document.getElementById('traversalCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
             trEdges.forEach(e => {
                 ctx.beginPath(); ctx.moveTo(trNodes[e.f].x, trNodes[e.f].y); ctx.lineTo(trNodes[e.t].x, trNodes[e.t].y);
                 ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
@@ -905,6 +1595,8 @@
         const spanMinEdges = [ 
             {f:0,t:1}, {f:0,t:2}, {f:1,t:3}, {f:2,t:4}, {f:3,t:5} 
         ];
+        let exprTreeRoot = null;
+        const defaultExprInput = '3 + ((5 + 9) * 2)';
 
         function toggleSpanning() {
             state.showSpanning = !state.showSpanning;
@@ -915,37 +1607,226 @@
 
         function renderSpanningCanvas() {
             if(state.activeTab !== 'spanning') return;
-            const canvas = document.getElementById('spanningCanvas'); const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const canvas = document.getElementById('spanningCanvas');
+            if (!canvas) return;
+            const parent = canvas.parentElement;
+            if (parent) {
+                const rect = parent.getBoundingClientRect();
+                canvas.width = Math.max(320, Math.floor(rect.width - 16));
+                canvas.height = Math.max(240, Math.floor(rect.height - 16));
+            }
+            const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const sx = canvas.width / 400;
+            const sy = canvas.height / 300;
+            const scaledNodes = spanNodes.map(n => ({ x: n.x * sx, y: n.y * sy, l: n.l }));
             const edgesToDraw = state.showSpanning ? spanMinEdges : spanAllEdges;
             spanAllEdges.forEach(e => {
                 if(state.showSpanning && !spanMinEdges.includes(e)) {
-                    ctx.beginPath(); ctx.moveTo(spanNodes[e.f].x, spanNodes[e.f].y); ctx.lineTo(spanNodes[e.t].x, spanNodes[e.t].y);
+                    ctx.beginPath(); ctx.moveTo(scaledNodes[e.f].x, scaledNodes[e.f].y); ctx.lineTo(scaledNodes[e.t].x, scaledNodes[e.t].y);
                     ctx.strokeStyle = '#f1f5f9'; ctx.setLineDash([5,5]); ctx.lineWidth = 1; ctx.stroke(); ctx.setLineDash([]);
                 }
             });
             edgesToDraw.forEach(e => {
-                ctx.beginPath(); ctx.moveTo(spanNodes[e.f].x, spanNodes[e.f].y); ctx.lineTo(spanNodes[e.t].x, spanNodes[e.t].y);
+                ctx.beginPath(); ctx.moveTo(scaledNodes[e.f].x, scaledNodes[e.f].y); ctx.lineTo(scaledNodes[e.t].x, scaledNodes[e.t].y);
                 ctx.strokeStyle = state.showSpanning ? '#f59e0b' : '#cbd5e1'; ctx.lineWidth = state.showSpanning ? 3 : 2; ctx.stroke();
             });
-            spanNodes.forEach(n => drawNode(ctx, n.x, n.y, n.l, '#ffffff', '#64748b', '#0f172a'));
+            scaledNodes.forEach(n => drawNode(ctx, n.x, n.y, n.l, '#ffffff', '#64748b', '#0f172a'));
+        }
+
+        function tokenizeExpression(expression) {
+            return expression
+                .replace(/\s+/g, '')
+                .match(/[A-Za-z_][A-Za-z0-9_]*|\d+(?:\.\d+)?|[()+\-*/^]/g) || [];
+        }
+
+        function toPostfix(tokens) {
+            const out = [];
+            const ops = [];
+            const prec = { '+': 1, '-': 1, '*': 2, '/': 2, '^': 3 };
+            const rightAssoc = { '^': true };
+            const isOp = (t) => Object.prototype.hasOwnProperty.call(prec, t);
+
+            for (const t of tokens) {
+                if (/^[A-Za-z_][A-Za-z0-9_]*$/.test(t) || /^\d+(\.\d+)?$/.test(t)) {
+                    out.push(t);
+                } else if (isOp(t)) {
+                    while (ops.length) {
+                        const top = ops[ops.length - 1];
+                        if (!isOp(top)) break;
+                        const shouldPop = rightAssoc[t] ? prec[t] < prec[top] : prec[t] <= prec[top];
+                        if (!shouldPop) break;
+                        out.push(ops.pop());
+                    }
+                    ops.push(t);
+                } else if (t === '(') {
+                    ops.push(t);
+                } else if (t === ')') {
+                    while (ops.length && ops[ops.length - 1] !== '(') out.push(ops.pop());
+                    if (!ops.length) throw new Error('Mismatched parentheses.');
+                    ops.pop();
+                }
+            }
+            while (ops.length) {
+                const t = ops.pop();
+                if (t === '(' || t === ')') throw new Error('Mismatched parentheses.');
+                out.push(t);
+            }
+            return out;
+        }
+
+        function postfixToExprTree(postfix) {
+            const stack = [];
+            const isOp = (t) => ['+', '-', '*', '/', '^'].includes(t);
+            for (const token of postfix) {
+                if (!isOp(token)) {
+                    stack.push({ value: token, left: null, right: null, x: 0, y: 0 });
+                } else {
+                    if (stack.length < 2) throw new Error('Invalid expression.');
+                    const right = stack.pop();
+                    const left = stack.pop();
+                    stack.push({ value: token, left, right, x: 0, y: 0 });
+                }
+            }
+            if (stack.length !== 1) throw new Error('Invalid expression.');
+            return stack[0];
+        }
+
+        function countExprNodes(node) {
+            if (!node) return 0;
+            return 1 + countExprNodes(node.left) + countExprNodes(node.right);
+        }
+
+        function layoutExprTree(root, canvasWidth) {
+            let order = 0;
+            const total = countExprNodes(root);
+            const xPad = 30;
+            const yStart = 42;
+            const yGap = 62;
+            function walk(node, depth) {
+                if (!node) return;
+                walk(node.left, depth + 1);
+                order += 1;
+                node.x = xPad + (order * (canvasWidth - 2 * xPad)) / Math.max(2, total + 1);
+                node.y = yStart + depth * yGap;
+                walk(node.right, depth + 1);
+            }
+            walk(root, 0);
+        }
+
+        function drawExprEdges(ctx, node) {
+            if (!node) return;
+            if (node.left) {
+                ctx.beginPath(); ctx.moveTo(node.x, node.y); ctx.lineTo(node.left.x, node.left.y);
+                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
+                drawExprEdges(ctx, node.left);
+            }
+            if (node.right) {
+                ctx.beginPath(); ctx.moveTo(node.x, node.y); ctx.lineTo(node.right.x, node.right.y);
+                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
+                drawExprEdges(ctx, node.right);
+            }
+        }
+
+        function drawExprNode3D(ctx, node) {
+            const isOp = ['+', '-', '*', '/', '^'].includes(node.value);
+            const r = 20;
+            const grad = ctx.createRadialGradient(node.x - 6, node.y - 8, 2, node.x, node.y, r + 2);
+            if (isOp) {
+                grad.addColorStop(0, '#ecfeff');
+                grad.addColorStop(1, '#14b8a6');
+            } else {
+                grad.addColorStop(0, '#ffffff');
+                grad.addColorStop(1, '#cbd5e1');
+            }
+            ctx.beginPath();
+            ctx.arc(node.x, node.y + 3, r, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(15,23,42,0.12)';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, r, 0, Math.PI * 2);
+            ctx.fillStyle = grad;
+            ctx.fill();
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = isOp ? '#0f766e' : '#64748b';
+            ctx.stroke();
+            ctx.fillStyle = isOp ? '#042f2e' : '#0f172a';
+            ctx.font = 'bold 14px Inter';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(node.value, node.x, node.y);
+        }
+
+        function drawExprNodes(ctx, node) {
+            if (!node) return;
+            drawExprNode3D(ctx, node);
+            drawExprNodes(ctx, node.left);
+            drawExprNodes(ctx, node.right);
+        }
+
+        function preOrderExpr(node, output = []) {
+            if (!node) return output;
+            output.push(node.value);
+            preOrderExpr(node.left, output);
+            preOrderExpr(node.right, output);
+            return output;
         }
 
         function renderExprCanvas() {
             if(state.activeTab !== 'spanning') return;
-            const canvas = document.getElementById('exprCanvas'); const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
-            const exNodes = [
-                {l:'+', x:150, y:30, t:'op'}, {l:'3', x:75, y:80, t:'val'}, {l:'*', x:225, y:80, t:'op'},
-                {l:'+', x:150, y:130, t:'op'}, {l:'2', x:275, y:130, t:'val'}, {l:'5', x:100, y:180, t:'val'}, {l:'9', x:200, y:180, t:'val'}
-            ];
-            const exEdges = [ {f:0,t:1},{f:0,t:2},{f:2,t:3},{f:2,t:4},{f:3,t:5},{f:3,t:6} ];
-            exEdges.forEach(e => {
-                ctx.beginPath(); ctx.moveTo(exNodes[e.f].x, exNodes[e.f].y); ctx.lineTo(exNodes[e.t].x, exNodes[e.t].y);
-                ctx.strokeStyle = '#cbd5e1'; ctx.lineWidth = 2; ctx.stroke();
-            });
-            exNodes.forEach(n => {
-                const bg = n.t === 'op' ? '#dcfce7' : '#ffffff'; const border = n.t === 'op' ? '#22c55e' : '#64748b'; const text = n.t === 'op' ? '#166534' : '#0f172a';
-                drawNode(ctx, n.x, n.y, n.l, bg, border, text);
-            });
+            const canvas = document.getElementById('exprCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (!exprTreeRoot) {
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = '13px Inter';
+                ctx.textAlign = 'center';
+                ctx.fillText('Generate an expression to visualize the 3D tree.', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+            layoutExprTree(exprTreeRoot, canvas.width);
+            drawExprEdges(ctx, exprTreeRoot);
+            drawExprNodes(ctx, exprTreeRoot);
+        }
+
+        function setExprStatus(message, isError = false) {
+            const status = document.getElementById('expr-status');
+            if (!status) return;
+            status.innerText = message;
+            status.className = isError ? 'text-xs text-red-600 mb-2' : 'text-xs text-slate-500 mb-2';
+        }
+
+        function generateExpressionTree() {
+            const input = document.getElementById('expr-input');
+            if (!input) return;
+            const expr = input.value.trim();
+            if (!expr) {
+                exprTreeRoot = null;
+                setExprStatus('Please enter an expression first.', true);
+                renderExprCanvas();
+                return;
+            }
+            try {
+                const tokens = tokenizeExpression(expr);
+                if (!tokens.length) throw new Error('No valid tokens found.');
+                const postfix = toPostfix(tokens);
+                exprTreeRoot = postfixToExprTree(postfix);
+                const prefix = preOrderExpr(exprTreeRoot, []).join(' ');
+                setExprStatus(`Generated successfully. Postfix: ${postfix.join(' ')} | Prefix: ${prefix}`);
+                renderExprCanvas();
+            } catch (err) {
+                exprTreeRoot = null;
+                setExprStatus(`Could not parse expression: ${err.message}`, true);
+                renderExprCanvas();
+            }
+        }
+
+        function resetExpressionTree() {
+            const input = document.getElementById('expr-input');
+            if (input) input.value = defaultExprInput;
+            exprTreeRoot = null;
+            setExprStatus('Ready to generate tree.');
+            renderExprCanvas();
         }
 
         // --- Charts Initialization ---
@@ -954,8 +1835,9 @@
 
         function initCharts() {
             if (state.activeTab === 'searching') {
-                const ctxSearch = document.getElementById('searchChart').getContext('2d');
-                if(!searchChartInst) {
+                const searchChartCanvas = document.getElementById('searchChart');
+                if(searchChartCanvas && !searchChartInst) {
+                    const ctxSearch = searchChartCanvas.getContext('2d');
                     const labels = [10, 50, 100, 500, 1000, 5000];
                     searchChartInst = new Chart(ctxSearch, {
                         type: 'line',
@@ -971,8 +1853,9 @@
                 }
             }
             if (state.activeTab === 'spanning') {
-                const ctxBar = document.getElementById('barChart').getContext('2d');
-                if(!barChartInst) {
+                const barCanvas = document.getElementById('barChart');
+                if(barCanvas && !barChartInst) {
+                    const ctxBar = barCanvas.getContext('2d');
                     barChartInst = new Chart(ctxBar, {
                         type: 'bar',
                         data: {
@@ -986,7 +1869,7 @@
         }
 
         function renderAll() {
-            renderGraphSection(); renderTreeSection(); renderTraversalCanvas(); renderSpanningCanvas(); renderExprCanvas(); initCharts(); renderSearchCanvas();
+            renderGraphSection(); renderTreeSection(); renderBSTCanvas(); renderTraversalCanvas(); renderSpanningCanvas(); renderExprCanvas(); initCharts(); renderSearchCanvas();
         }
 
        
@@ -1015,7 +1898,7 @@
             document.getElementById('ai-context-label').innerText = tabLabels[tabId];
             aiContexts[tabId].forEach(prompt => {
                 const btn = document.createElement('button');
-                btn.className = "inline-block bg-white border border-amber-200 text-amber-700 text-xs px-3 py-1.5 rounded-full mr-2 hover:bg-amber-50 shadow-sm";
+                btn.className = "inline-flex items-center bg-white border border-slate-200 text-slate-700 text-xs px-3 py-1.5 rounded-full mr-2 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-200 shadow-sm transition";
                 btn.innerText = prompt;
                 btn.onclick = () => { document.getElementById('ai-input').value = prompt.replace(' ✨', ''); handleAISubmit(new Event('submit')); };
                 container.appendChild(btn);
@@ -1027,18 +1910,85 @@
             wrapper.className = `flex flex-col gap-1 ${role === 'user' ? 'items-end' : 'items-start'}`;
             const label = document.createElement('span'); label.className = "text-xs text-slate-400 mx-1"; label.innerText = role === 'user' ? 'You' : 'AI Tutor';
             const bubble = document.createElement('div');
-            if (role === 'user') { bubble.className = "bg-amber-600 text-white p-3 rounded-2xl rounded-tr-sm shadow-sm max-w-[90%] text-sm"; bubble.innerText = text; } 
-            else { bubble.className = "bg-slate-100 text-slate-700 p-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-200 prose prose-sm max-w-[95%] overflow-hidden"; if (isHtml) bubble.innerHTML = text; else bubble.innerText = text; }
+            if (role === 'user') { bubble.className = "bg-amber-600 text-white p-3 rounded-2xl rounded-tr-sm shadow-sm max-w-[90%] text-sm border border-amber-500"; bubble.innerText = text; } 
+            else { bubble.className = "bg-white text-slate-700 p-3 rounded-2xl rounded-tl-sm shadow-sm border border-slate-200 prose prose-sm max-w-[95%] overflow-hidden"; if (isHtml) bubble.innerHTML = text; else bubble.innerText = text; }
             wrapper.appendChild(label); wrapper.appendChild(bubble); chatContainer.appendChild(wrapper); chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function showAIErrorBanner(kind, message) {
+            const chatContainer = document.getElementById('ai-chat');
+            if (!chatContainer) return;
+            const wrapper = document.createElement('div');
+            const toneClass = kind === 'quota' ? 'bg-amber-50 border-amber-200 text-amber-900' : 'bg-red-50 border-red-200 text-red-900';
+            wrapper.className = `p-3 rounded-lg border text-xs font-medium ${toneClass}`;
+            wrapper.innerText = message;
+            chatContainer.appendChild(wrapper);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
         }
 
         function showTypingIndicator() {
             const chatContainer = document.getElementById('ai-chat'); const wrapper = document.createElement('div');
             wrapper.id = 'typing-indicator-wrapper'; wrapper.className = "flex flex-col gap-1 items-start";
-            const bubble = document.createElement('div'); bubble.className = "bg-slate-100 p-4 rounded-2xl rounded-tl-sm shadow-sm border border-slate-200 typing-indicator"; bubble.innerHTML = "<span></span><span></span><span></span>";
+            const bubble = document.createElement('div'); bubble.className = "bg-white p-4 rounded-2xl rounded-tl-sm shadow-sm border border-slate-200 typing-indicator"; bubble.innerHTML = "<span></span><span></span><span></span>";
             wrapper.appendChild(bubble); chatContainer.appendChild(wrapper); chatContainer.scrollTop = chatContainer.scrollHeight;
         }
         function removeTypingIndicator() { const indicator = document.getElementById('typing-indicator-wrapper'); if (indicator) indicator.remove(); }
+
+        function appendMiniMessage(text, role = 'ai') {
+            const wrap = document.getElementById('mini-ai-chat');
+            if (!wrap) return;
+            const msg = document.createElement('div');
+            msg.className = role === 'user'
+                ? 'mini-chat-bubble bg-amber-500/25 border border-amber-300/30 text-amber-100 ml-6'
+                : 'mini-chat-bubble bg-slate-800 border border-slate-700 text-slate-200 mr-6';
+            msg.innerText = text;
+            wrap.appendChild(msg);
+            wrap.scrollTop = wrap.scrollHeight;
+        }
+
+        async function handleMiniAISubmit(e, presetText = null) {
+            if (e) e.preventDefault();
+            const input = document.getElementById('mini-ai-input');
+            const btn = document.getElementById('mini-ai-send');
+            if (!input || !btn) return;
+
+            const prompt = (presetText || input.value).trim();
+            if (!prompt) return;
+
+            if (!presetText) input.value = '';
+            appendMiniMessage(prompt, 'user');
+            appendMiniMessage('Thinking...', 'ai');
+
+            btn.disabled = true;
+            btn.innerText = '...';
+
+            try {
+                const activeSection = document.getElementById(`view-${state.activeTab}`);
+                const pageText = activeSection ? activeSection.innerText : '';
+                const response = await fetch('/api/tutor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt,
+                        context: tabLabels[state.activeTab] || 'Data Structures',
+                        pageContent: pageText
+                    })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Tutor API failed');
+                const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No response generated.';
+                const wrap = document.getElementById('mini-ai-chat');
+                if (wrap && wrap.lastElementChild) wrap.removeChild(wrap.lastElementChild);
+                appendMiniMessage(rawText, 'ai');
+            } catch (error) {
+                const wrap = document.getElementById('mini-ai-chat');
+                if (wrap && wrap.lastElementChild) wrap.removeChild(wrap.lastElementChild);
+                appendMiniMessage('I could not answer right now (check API/quota).', 'ai');
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Send';
+            }
+        }
 
         // General Chat Query using SDK
        async function handleAISubmit(e) {
@@ -1075,7 +2025,10 @@
       }
 
       // Extract text from the backend response
-      const rawText = data.candidates[0].content.parts[0].text;
+      const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (!rawText) {
+        throw new Error("Invalid AI response format.");
+      }
       const aiText = marked.parse(rawText);
       
       if (typeof hideTypingIndicator === 'function') hideTypingIndicator();
@@ -1088,7 +2041,17 @@
       if (typeof hideTypingIndicator === 'function') hideTypingIndicator();
       if (typeof removeTypingIndicator === 'function') removeTypingIndicator();
       
-      appendMessage('ai', "Error connecting to tutor. Please check if the Netlify Function is working.");
+      const msg = (error && error.message ? error.message : "").toLowerCase();
+      if (msg.includes("quota") || msg.includes("rate limit") || msg.includes("429")) {
+        showAIErrorBanner('quota', "AI quota exceeded for the current API key. Update billing/quota settings or retry later.");
+      } else if (msg.includes("network") || msg.includes("failed to fetch")) {
+        showAIErrorBanner('network', "Network error: unable to reach /api/tutor. Check your deployment and internet connection.");
+      } else if (msg.includes("invalid ai response")) {
+        showAIErrorBanner('network', "AI returned an unexpected payload shape. Check backend response format.");
+      } else {
+        showAIErrorBanner('network', "Error connecting to tutor. Please verify the serverless API is running.");
+      }
+      appendMessage('ai', "I couldn't complete that request. Please try again after checking API status.");
     }
 }
 
@@ -1165,11 +2128,13 @@
         const resizer = document.getElementById('panel-resizer');
         let isResizing = false;
 
-        resizer.addEventListener('mousedown', (e) => {
-            isResizing = true;
-            document.body.style.cursor = 'col-resize';
-            e.preventDefault(); 
-        });
+        if (resizer) {
+            resizer.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                document.body.style.cursor = 'col-resize';
+                e.preventDefault(); 
+            });
+        }
 
         document.addEventListener('mousemove', (e) => {
             if (!isResizing) return;
@@ -1178,7 +2143,7 @@
             if (newWidth < 300) newWidth = 300; 
             if (newWidth > window.innerWidth * 0.9) newWidth = window.innerWidth * 0.9;
             
-            aiPanel.style.width = newWidth + 'px';
+            if (aiPanel) aiPanel.style.width = newWidth + 'px';
         });
 
         document.addEventListener('mouseup', () => {
@@ -1194,13 +2159,16 @@
         let searchState = { left: 0, right: searchData.length - 1, mid: -1, found: false };
 
         function resetSearch() {
+            pauseSearch();
             searchStep = 0;
             searchState = { left: 0, right: searchData.length - 1, mid: -1, found: false };
             const logEl = document.getElementById('search-log');
+            const playBtn = document.getElementById('search-play-btn');
             if (logEl) {
                 logEl.className = "mt-4 p-4 bg-teal-50 border border-teal-200 rounded text-sm text-teal-900 font-mono font-medium shadow-inner";
                 logEl.innerText = "Ready to search. Click 'Step Forward' to begin.";
             }
+            if (playBtn) playBtn.innerText = 'Play';
             renderSearchCanvas();
         }
 
@@ -1214,6 +2182,7 @@
                 if (searchStep >= searchData.length) {
                     logEl.innerText = `Target ${target} not found in array.`;
                     logEl.className = "mt-4 p-4 bg-red-50 border border-red-200 rounded text-sm text-red-900 font-mono font-medium";
+                    pauseSearch();
                     return;
                 }
                 if (searchData[searchStep] === target) {
@@ -1229,6 +2198,7 @@
                 if (searchState.left > searchState.right) {
                     logEl.innerText = `Target ${target} not found! Left pointer crossed Right pointer.`;
                     logEl.className = "mt-4 p-4 bg-red-50 border border-red-200 rounded text-sm text-red-900 font-mono font-medium";
+                    pauseSearch();
                     return;
                 }
                 searchState.mid = Math.floor((searchState.left + searchState.right) / 2);
@@ -1248,6 +2218,31 @@
                 searchStep++;
             }
             renderSearchCanvas();
+            if (searchState.found) pauseSearch();
+        }
+
+        function playSearch() {
+            if (state.searchTimer) return;
+            const speedEl = document.getElementById('search-speed');
+            const playBtn = document.getElementById('search-play-btn');
+            const speed = speedEl ? parseInt(speedEl.value, 10) : 700;
+            if (playBtn) playBtn.innerText = 'Playing...';
+            state.searchTimer = setInterval(() => {
+                const exhaustedLinear = document.getElementById('search-algo').value === 'linear' && searchStep >= searchData.length;
+                const exhaustedBinary = document.getElementById('search-algo').value === 'binary' && searchState.left > searchState.right;
+                if (searchState.found || exhaustedLinear || exhaustedBinary) {
+                    pauseSearch();
+                    return;
+                }
+                stepSearch();
+            }, speed);
+        }
+
+        function pauseSearch() {
+            clearInterval(state.searchTimer);
+            state.searchTimer = null;
+            const playBtn = document.getElementById('search-play-btn');
+            if (playBtn) playBtn.innerText = 'Play';
         }
 
         function renderSearchCanvas() {
@@ -1288,9 +2283,35 @@
                 ctx.fillText(`[${i}]`, startX + i * (boxW + gap) + boxW/2, startY + boxH + 20);
             });
         }
+
+        function initSpotlightCards() {
+            document.querySelectorAll('[data-spotlight]').forEach(card => {
+                card.addEventListener('mousemove', (event) => {
+                    const rect = card.getBoundingClientRect();
+                    const x = ((event.clientX - rect.left) / rect.width) * 100;
+                    const y = ((event.clientY - rect.top) / rect.height) * 100;
+                    card.style.setProperty('--spotlight-x', `${x}%`);
+                    card.style.setProperty('--spotlight-y', `${y}%`);
+                });
+            });
+        }
+
+        function toggleExerciseAnswer(answerId, btn) {
+            const answer = document.getElementById(answerId);
+            if (!answer || !btn) return;
+            const isHidden = answer.classList.contains('hidden');
+            if (isHidden) {
+                answer.classList.remove('hidden');
+                btn.innerText = 'Hide Answer';
+            } else {
+                answer.classList.add('hidden');
+                btn.innerText = 'Show Answer';
+            }
+        }
+
         // Init
         window.addEventListener('DOMContentLoaded', () => {
-            updateStackUI(); updateQueueUI(); switchTab('foundations');
+            updateStackUI(); updateQueueUI(); initSpotlightCards(); resetExpressionTree(); generateExpressionTree(); switchTab('foundations');
         });
 
     </script>
