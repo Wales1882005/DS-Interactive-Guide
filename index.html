@@ -139,6 +139,42 @@
             font-size: 0.76rem;
             line-height: 1.35;
         }
+        .sort-3d-wrap {
+            height: 220px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 4px 0;
+        }
+        .sort-3d-col {
+            width: 32px;
+            position: relative;
+            border-radius: 4px 4px 0 0;
+            border: 1px solid #0f766e;
+            background: linear-gradient(180deg, #5eead4 0%, #14b8a6 55%, #0f766e 100%);
+            box-shadow: inset -5px 0 0 rgba(15, 118, 110, 0.28), inset 5px 0 0 rgba(255, 255, 255, 0.18), 0 6px 12px rgba(15, 23, 42, 0.15);
+            transition: height 0.35s ease, transform 0.25s ease, filter 0.25s ease;
+        }
+        .sort-3d-col.active {
+            filter: saturate(1.25);
+            transform: translateY(-4px);
+            border-color: #f59e0b;
+            background: linear-gradient(180deg, #fde68a 0%, #f59e0b 70%, #b45309 100%);
+        }
+        .sort-3d-col.done {
+            border-color: #15803d;
+            background: linear-gradient(180deg, #bbf7d0 0%, #22c55e 70%, #15803d 100%);
+        }
+        .sort-3d-col .val {
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: #334155;
+            font-weight: 700;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 h-screen flex overflow-hidden selection:bg-teal-200 selection:text-teal-900">
@@ -156,7 +192,8 @@
             <button onclick="switchTab('traversals')" id="btn-traversals" class="nav-card"><span class="nav-meta">Module 5</span><span class="nav-title">Tree Traversals</span><span class="nav-subtitle">Animated node visit order</span></button>
             <button onclick="switchTab('spanning')" id="btn-spanning" class="nav-card"><span class="nav-meta">Module 6</span><span class="nav-title">Spanning & Parsing</span><span class="nav-subtitle">MST and expression trees</span></button>
             <button onclick="switchTab('searching')" id="btn-searching" class="nav-card"><span class="nav-meta">Module 7</span><span class="nav-title">Search Algorithms</span><span class="nav-subtitle">Step-by-step search visualizer</span></button>
-            <button onclick="switchTab('practice')" id="btn-practice" class="nav-card"><span class="nav-meta">Module 8</span><span class="nav-title">Practice & Exams</span><span class="nav-subtitle">Tracing drills and mock exam</span></button>
+            <button onclick="switchTab('sorting')" id="btn-sorting" class="nav-card"><span class="nav-meta">Module 8</span><span class="nav-title">Sorting</span><span class="nav-subtitle">3D algorithm visualizers</span></button>
+            <button onclick="switchTab('practice')" id="btn-practice" class="nav-card"><span class="nav-meta">Module 9</span><span class="nav-title">Practice & Exams</span><span class="nav-subtitle">Tracing drills and mock exam</span></button>
         </nav>
     </aside>
 
@@ -171,7 +208,8 @@
                 <option value="traversals">5. Tree Traversals</option>
                 <option value="spanning">6. Spanning & Parsing</option>
                 <option value="searching">7. Search Algorithms</option>
-                <option value="practice">8. Practice & Exams</option>
+                <option value="sorting">8. Sorting</option>
+                <option value="practice">9. Practice & Exams</option>
             </select>
         </header>
 
@@ -722,29 +760,31 @@
                 </div>
 
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
-                    <h2 class="text-xl font-bold text-slate-800 mb-4">Postfix Evaluation Algorithm (Stack Walkthrough)</h2>
-                    <p class="text-sm text-slate-600 mb-6">Evaluating: <code class="font-bold text-teal-700 bg-teal-50 px-2 py-1 rounded">6 4 2 + - 3 8 16 / + * 2 ^ 3 +</code></p>
-                    <div class="overflow-x-auto pb-4">
-                        <table class="w-full text-sm text-left border-collapse min-w-[600px]">
+                    <h2 class="text-xl font-bold text-slate-800 mb-4">3D Interactive Postfix Generator</h2>
+                    <p class="text-sm text-slate-600 mb-3">Enter a postfix expression and visualize stack evaluation in 3D-style bars.</p>
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        <input id="postfix-input" type="text" value="6 4 2 + - 3 8 16 / + * 2 ^ 3 +" class="flex-1 min-w-[280px] border border-slate-300 rounded px-3 py-2 text-sm outline-none focus:border-teal-500" />
+                        <button onclick="postfixInit()" class="px-3 py-2 text-xs rounded bg-slate-200 hover:bg-slate-300">Reset</button>
+                        <button onclick="postfixStep()" class="px-3 py-2 text-xs rounded bg-teal-600 text-white hover:bg-teal-500">Step</button>
+                        <button onclick="postfixPlay()" class="px-3 py-2 text-xs rounded bg-slate-800 text-white hover:bg-slate-700">Play</button>
+                        <button onclick="postfixPause()" class="px-3 py-2 text-xs rounded bg-slate-200 hover:bg-slate-300">Pause</button>
+                    </div>
+                    <p id="postfix-status" class="text-xs text-slate-500 mb-3">Ready.</p>
+                    <div class="bg-slate-50 rounded-lg border border-slate-200 p-3 mb-4">
+                        <div id="postfix-stack-wrap" class="sort-3d-wrap"></div>
+                    </div>
+                    <div class="overflow-x-auto pb-2">
+                        <table class="w-full text-sm text-left border-collapse min-w-[640px]">
                             <thead>
                                 <tr class="border-b-2 border-slate-200 text-slate-700">
+                                    <th class="pb-2">Step</th>
                                     <th class="pb-2">Token</th>
                                     <th class="pb-2">Action</th>
-                                    <th class="pb-2">Stack State (Bottom &rarr; Top)</th>
+                                    <th class="pb-2">Stack State (Bottom → Top)</th>
                                     <th class="pb-2">Calculation</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-slate-100 font-mono text-slate-600">
-                                <tr><td class="py-2">6</td><td>Push</td><td>[6]</td><td>-</td></tr>
-                                <tr><td class="py-2">4</td><td>Push</td><td>[6, 4]</td><td>-</td></tr>
-                                <tr><td class="py-2">2</td><td>Push</td><td>[6, 4, 2]</td><td>-</td></tr>
-                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">+</td><td>Pop 2, Eval, Push</td><td>[6, 6]</td><td>4 + 2 = 6</td></tr>
-                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">-</td><td>Pop 2, Eval, Push</td><td>[0]</td><td>6 - 6 = 0</td></tr>
-                                <tr><td class="py-2">3</td><td>Push</td><td>[0, 3]</td><td>-</td></tr>
-                                <tr><td class="py-2">8</td><td>Push</td><td>[0, 3, 8]</td><td>-</td></tr>
-                                <tr><td class="py-2">16</td><td>Push</td><td>[0, 3, 8, 16]</td><td>-</td></tr>
-                                <tr class="bg-teal-50 text-teal-800"><td class="py-2 font-bold">/</td><td>Pop 2, Eval, Push</td><td>[0, 3, 2]</td><td>16 / 8 = 2</td></tr>
-                            </tbody>
+                            <tbody id="postfix-steps-body" class="divide-y divide-slate-100 font-mono text-slate-600"></tbody>
                         </table>
                     </div>
                 </div>
@@ -907,6 +947,81 @@
                     
                     <div id="search-log" class="mt-4 p-4 bg-teal-50 border border-teal-200 rounded text-sm text-teal-900 font-mono font-medium shadow-inner">
                         Ready to search. Select an algorithm and click 'Step Forward' to begin.
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-sorting" class="hidden fade-in max-w-5xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">Sorting Algorithms</h1>
+                    <p class="text-lg text-slate-600">Explore Bubble, Selection, Merge, and Radix sorting through 3D interactive visualizers. Enter a list, run step-by-step, or autoplay to watch how the list becomes sorted.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-slate-800">Bubble Sort</h3>
+                            <span class="text-xs px-2 py-1 rounded-full bg-teal-50 text-teal-700 border border-teal-200">Adjacent swap</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <input id="bubble-input" class="flex-1 min-w-[220px] border border-slate-300 rounded px-2 py-1 text-xs" value="23, 45, 12, 9, 89, 90, 67" />
+                            <button onclick="sortInit('bubble')" class="px-3 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300">Reset</button>
+                            <button onclick="sortStep('bubble')" class="px-3 py-1 text-xs rounded bg-teal-600 text-white hover:bg-teal-500">Step</button>
+                            <button onclick="sortPlay('bubble')" class="px-3 py-1 text-xs rounded bg-slate-800 text-white hover:bg-slate-700">Play</button>
+                            <button onclick="sortPause('bubble')" class="px-3 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300">Pause</button>
+                        </div>
+                        <p id="bubble-status" class="text-[11px] text-slate-500 mb-2">Ready.</p>
+                        <div id="bubble-wrap" class="sort-3d-wrap bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-slate-800">Selection Sort</h3>
+                            <span class="text-xs px-2 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">Pick minimum</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <input id="selection-input" class="flex-1 min-w-[220px] border border-slate-300 rounded px-2 py-1 text-xs" value="9, 43, 76, 88, 12, 8, 3, 4" />
+                            <button onclick="sortInit('selection')" class="px-3 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300">Reset</button>
+                            <button onclick="sortStep('selection')" class="px-3 py-1 text-xs rounded bg-teal-600 text-white hover:bg-teal-500">Step</button>
+                            <button onclick="sortPlay('selection')" class="px-3 py-1 text-xs rounded bg-slate-800 text-white hover:bg-slate-700">Play</button>
+                            <button onclick="sortPause('selection')" class="px-3 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300">Pause</button>
+                        </div>
+                        <p id="selection-status" class="text-[11px] text-slate-500 mb-2">Ready.</p>
+                        <div id="selection-wrap" class="sort-3d-wrap bg-slate-50 border border-slate-200 rounded-lg"></div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-slate-800">Merge Sort</h3>
+                            <span class="text-xs px-2 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Divide & merge</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <input id="merge-input" class="flex-1 min-w-[220px] border border-slate-300 rounded px-2 py-1 text-xs" value="80, 50, 20, 10, 30, 40, 60, 70" />
+                            <button onclick="sortInit('merge')" class="px-3 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300">Reset</button>
+                            <button onclick="sortStep('merge')" class="px-3 py-1 text-xs rounded bg-teal-600 text-white hover:bg-teal-500">Step</button>
+                            <button onclick="sortPlay('merge')" class="px-3 py-1 text-xs rounded bg-slate-800 text-white hover:bg-slate-700">Play</button>
+                            <button onclick="sortPause('merge')" class="px-3 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300">Pause</button>
+                        </div>
+                        <p id="merge-status" class="text-[11px] text-slate-500 mb-2">Ready.</p>
+                        <div class="mt-3 bg-slate-50 border border-slate-200 rounded-lg p-2 overflow-x-auto">
+                            <canvas id="mergeTreeCanvas" width="900" height="500" class="w-full h-[500px]"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-bold text-slate-800">Radix Sort (LSD)</h3>
+                            <span class="text-xs px-2 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200">Digit buckets</span>
+                        </div>
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <input id="radix-input" class="flex-1 min-w-[220px] border border-slate-300 rounded px-2 py-1 text-xs" value="82, 901, 100, 12, 250, 77, 65, 23" />
+                            <button onclick="sortInit('radix')" class="px-3 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300">Reset</button>
+                            <button onclick="sortStep('radix')" class="px-3 py-1 text-xs rounded bg-teal-600 text-white hover:bg-teal-500">Step</button>
+                            <button onclick="sortPlay('radix')" class="px-3 py-1 text-xs rounded bg-slate-800 text-white hover:bg-slate-700">Play</button>
+                            <button onclick="sortPause('radix')" class="px-3 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300">Pause</button>
+                        </div>
+                        <p id="radix-status" class="text-[11px] text-slate-500 mb-2">Ready.</p>
+                        <div id="radix-pass-tables" class="mt-3 space-y-3"></div>
                     </div>
                 </div>
             </section>
@@ -1079,7 +1194,7 @@
 
     <script>
         // --- Navigation and State Management ---
-        const tabs = ['foundations', 'linear', 'graphs', 'trees', 'traversals', 'spanning', 'searching', 'practice'];
+        const tabs = ['foundations', 'linear', 'graphs', 'trees', 'traversals', 'spanning', 'searching', 'sorting', 'practice'];
         const state = {
             activeTab: 'foundations',
             highlightedEdge: null,
@@ -1093,7 +1208,11 @@
             showGraphArrows: true,
             showGraphLabels: true,
             visitedTabs: new Set(['foundations']),
-            searchTimer: null
+            searchTimer: null,
+            sortStates: {},
+            sortTimers: {},
+            postfixState: { steps: [], index: 0 },
+            postfixTimer: null
         };
 
         const tabLabels = {
@@ -1104,6 +1223,7 @@
             'traversals': 'Tree Traversals',
             'spanning': 'Spanning & Expression Trees',
             'searching': 'Search Algorithms',
+            'sorting': 'Sorting',
             'practice': 'Practice & Exams'
         };
 
@@ -1130,7 +1250,7 @@
             const activeBtn = document.getElementById(`btn-${activeTab}`);
             if (activeBtn) {
                 // Apply specific theme coloring based on module logic
-                if (['foundations', 'linear', 'searching', 'practice'].includes(activeTab)) {
+                if (['foundations', 'linear', 'searching', 'sorting', 'practice'].includes(activeTab)) {
                     activeBtn.classList.add('active-teal');
                 } else {
                     activeBtn.classList.add('active-amber');
@@ -1869,7 +1989,7 @@
         }
 
         function renderAll() {
-            renderGraphSection(); renderTreeSection(); renderBSTCanvas(); renderTraversalCanvas(); renderSpanningCanvas(); renderExprCanvas(); initCharts(); renderSearchCanvas();
+            renderGraphSection(); renderTreeSection(); renderBSTCanvas(); renderTraversalCanvas(); renderSpanningCanvas(); renderExprCanvas(); initCharts(); renderSearchCanvas(); renderSortingVisualizers(); renderPostfix();
         }
 
        
@@ -1881,6 +2001,7 @@
             'traversals': ["Write Python code for Breadth-First Traversal ✨", "Explain Pre-order traversal ✨"],
             'spanning': ["Explain Minimum Spanning Trees ✨", "How do Expression Trees enforce order of operations? ✨"],
             'searching': ["Explain Binary Search to a 5 year old ✨", "Write Linear search code ✨"],
+            'sorting': ["Explain Bubble vs Selection Sort ✨", "How does Radix Sort (LSD) work? ✨"],
             'practice': ["Give me another Queue trace problem ✨"]
         };
 
@@ -2284,6 +2405,628 @@
             });
         }
 
+        function getSortInputValues(type) {
+            const input = document.getElementById(`${type}-input`);
+            if (!input) return [];
+            return input.value.split(/[\s,]+/).map(v => parseInt(v, 10)).filter(v => !Number.isNaN(v));
+        }
+        function getSortInputSignature(type) {
+            return getSortInputValues(type).join(',');
+        }
+
+        function setSortStatus(type, message) {
+            const el = document.getElementById(`${type}-status`);
+            if (el) el.innerText = message;
+        }
+
+        function buildSortSteps(type, arr) {
+            const steps = [];
+            const a = arr.slice();
+            const n = a.length;
+            if (type === 'bubble') {
+                for (let i = 0; i < n - 1; i++) {
+                    for (let j = 0; j < n - i - 1; j++) {
+                        if (a[j] > a[j + 1]) [a[j], a[j + 1]] = [a[j + 1], a[j]];
+                        steps.push({ array: a.slice(), active: [j, j + 1], doneFrom: n - i });
+                    }
+                }
+            } else if (type === 'selection') {
+                for (let i = 0; i < n - 1; i++) {
+                    let min = i;
+                    for (let j = i + 1; j < n; j++) {
+                        if (a[j] < a[min]) min = j;
+                        steps.push({ array: a.slice(), active: [min, j], doneTo: i });
+                    }
+                    if (min !== i) [a[i], a[min]] = [a[min], a[i]];
+                    steps.push({ array: a.slice(), active: [i], doneTo: i + 1 });
+                }
+            } else if (type === 'merge') {
+                let current = a.slice();
+                let passNo = 0;
+                const mergeTwo = (left, right) => {
+                    const out = [];
+                    let i = 0, j = 0;
+                    while (i < left.length && j < right.length) {
+                        if (left[i] <= right[j]) out.push(left[i++]); else out.push(right[j++]);
+                    }
+                    while (i < left.length) out.push(left[i++]);
+                    while (j < right.length) out.push(right[j++]);
+                    return out;
+                };
+                for (let width = 1; width < n; width *= 2) {
+                    passNo++;
+                    const next = current.slice();
+                    const pairs = [];
+                    for (let i = 0; i < n; i += 2 * width) {
+                        const left = current.slice(i, i + width);
+                        const right = current.slice(i + width, i + 2 * width);
+                        const merged = mergeTwo(left, right);
+                        for (let k = 0; k < merged.length; k++) next[i + k] = merged[k];
+                        pairs.push({ left, right, merged });
+                    }
+                    current = next;
+                    const groups = [];
+                    for (let i = 0; i < n; i += 2 * width) groups.push(current.slice(i, i + 2 * width));
+                    steps.push({
+                        array: current.slice(),
+                        active: [],
+                        mergePass: passNo,
+                        width,
+                        pairs
+                    });
+                }
+                for (let i = 0; i < n; i++) a[i] = current[i];
+            } else if (type === 'radix') {
+                let max = Math.max(...a, 0);
+                let passNo = 0;
+                for (let exp = 1; Math.floor(max / exp) > 0; exp *= 10) {
+                    passNo++;
+                    const buckets = Array.from({ length: 10 }, () => []);
+                    a.forEach(v => buckets[Math.floor(v / exp) % 10].push(v));
+                    let idx = 0;
+                    buckets.forEach(b => b.forEach(v => { a[idx++] = v; }));
+                    steps.push({
+                        array: a.slice(),
+                        active: [],
+                        doneTo: 0,
+                        radixPass: passNo,
+                        exp,
+                        buckets: buckets.map(b => b.slice())
+                    });
+                }
+            }
+            steps.push({ array: a.slice(), active: [], doneAll: true });
+            return steps;
+        }
+
+        function sortInit(type) {
+            sortPause(type);
+            const nums = getSortInputValues(type);
+            if (!nums.length) {
+                setSortStatus(type, 'Please enter valid numbers.');
+                return;
+            }
+            state.sortStates[type] = {
+                base: nums.slice(),
+                steps: buildSortSteps(type, nums),
+                index: 0,
+                inputSig: nums.join(',')
+            };
+            setSortStatus(type, `Initialized with ${nums.length} values.`);
+            renderSortingVisualizer(type);
+            if (type === 'merge') drawMergeTreeDiagram('merge');
+        }
+
+        function sortStep(type) {
+            const s = state.sortStates[type];
+            if (!s) return sortInit(type);
+            const currentSig = getSortInputSignature(type);
+            if (s.inputSig !== currentSig) {
+                sortInit(type);
+                return;
+            }
+            s.index = Math.min(s.index + 1, s.steps.length - 1);
+            const step = s.steps[s.index];
+            if (type === 'radix' && step.radixPass) {
+                setSortStatus(type, step.doneAll ? 'Sorted.' : `Pass ${step.radixPass} | Step ${s.index}/${s.steps.length - 1}`);
+            } else if (type === 'merge' && step.mergePass) {
+                setSortStatus(type, step.doneAll ? 'Sorted.' : `Pass ${step.mergePass} (block ${step.width * 2}) | Step ${s.index}/${s.steps.length - 1}`);
+            } else {
+                setSortStatus(type, step.doneAll ? 'Sorted.' : `Step ${s.index}/${s.steps.length - 1}`);
+            }
+            renderSortingVisualizer(type);
+        }
+
+        function sortPlay(type) {
+            const s = state.sortStates[type];
+            const currentSig = getSortInputSignature(type);
+            // Auto-refresh to new input or restart after completion.
+            if (!s || s.inputSig !== currentSig || s.index >= s.steps.length - 1) sortInit(type);
+            sortPause(type);
+            state.sortTimers[type] = setInterval(() => {
+                const cur = state.sortStates[type];
+                if (!cur || cur.index >= cur.steps.length - 1) {
+                    sortPause(type);
+                    return;
+                }
+                sortStep(type);
+            }, 450);
+        }
+
+        function sortPause(type) {
+            clearInterval(state.sortTimers[type]);
+            state.sortTimers[type] = null;
+        }
+
+        function renderSortingVisualizer(type) {
+            if (state.activeTab !== 'sorting') return;
+            const wrap = document.getElementById(`${type}-wrap`);
+            if (!wrap && !['radix', 'merge'].includes(type)) return;
+            const s = state.sortStates[type];
+            const step = s ? s.steps[s.index] : null;
+            const arr = step ? step.array : getSortInputValues(type);
+            if (!arr.length) {
+                if (wrap) wrap.innerHTML = '';
+                if (type === 'merge') drawMergeTreeDiagram('merge');
+                if (type === 'radix') renderRadixPassTables();
+                return;
+            }
+            if (type === 'merge') {
+                drawMergeTreeDiagram('merge');
+                return;
+            }
+            if (type === 'radix') {
+                renderRadixPassTables();
+                return;
+            }
+            const max = Math.max(...arr, 1);
+            wrap.innerHTML = '';
+            arr.forEach((v, i) => {
+                const col = document.createElement('div');
+                col.className = 'sort-3d-col';
+                if (step && step.active && step.active.includes(i)) col.classList.add('active');
+                if (step && (step.doneAll || (step.doneTo && i < step.doneTo) || (step.doneFrom && i >= step.doneFrom))) col.classList.add('done');
+                col.style.height = `${Math.max(22, (v / max) * 170)}px`;
+                const val = document.createElement('span');
+                val.className = 'val';
+                val.innerText = String(v);
+                col.appendChild(val);
+                wrap.appendChild(col);
+            });
+        }
+
+        function renderMergePassTables() {
+            const host = document.getElementById('merge-pass-tables');
+            const s = state.sortStates.merge;
+            if (!host || !s || !s.steps) return;
+            const passSteps = s.steps.filter(st => st.mergePass);
+            if (!passSteps.length) { host.innerHTML = ''; return; }
+            const activePass = Math.min(s.index, passSteps.length) > 0 ? passSteps[Math.min(s.index, passSteps.length) - 1].mergePass : 0;
+            host.innerHTML = passSteps.map(pass => {
+                const isActive = pass.mergePass === activePass;
+                const rows = pass.pairs.map((pair, idx) =>
+                    `<tr><td class="border border-slate-200 px-2 py-1">${idx + 1}</td><td class="border border-slate-200 px-2 py-1">[${pair.left.join(', ')}]</td><td class="border border-slate-200 px-2 py-1">[${pair.right.join(', ')}]</td><td class="border border-slate-200 px-2 py-1 font-semibold">[${pair.merged.join(', ')}]</td></tr>`
+                ).join('');
+                return `
+                <div class="rounded-lg border ${isActive ? 'border-indigo-300 bg-indigo-50/60' : 'border-slate-200 bg-white'} p-3">
+                    <p class="text-xs font-bold ${isActive ? 'text-indigo-700' : 'text-slate-700'} mb-2">Pass ${pass.mergePass} - Merge block size ${pass.width} + ${pass.width}</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[11px] border-collapse min-w-[420px]">
+                            <thead><tr><th class="border border-slate-200 px-2 py-1 bg-slate-50">#</th><th class="border border-slate-200 px-2 py-1 bg-slate-50">Left</th><th class="border border-slate-200 px-2 py-1 bg-slate-50">Right</th><th class="border border-slate-200 px-2 py-1 bg-slate-50">Merged</th></tr></thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                    <p class="text-[11px] text-slate-600 mt-2"><strong>Array after pass:</strong> ${pass.array.join(', ')}</p>
+                </div>`;
+            }).join('');
+        }
+
+        function buildMergeDiagramTree(array) {
+            const node = { arr: array.slice(), left: null, right: null };
+            if (array.length <= 1) return node;
+            const mid = Math.floor(array.length / 2);
+            node.left = buildMergeDiagramTree(array.slice(0, mid));
+            node.right = buildMergeDiagramTree(array.slice(mid));
+            return node;
+        }
+
+        function collectMergeLevels(root) {
+            const levels = [];
+            const queue = [{ node: root, depth: 0, parent: null, side: '' }];
+            while (queue.length) {
+                const cur = queue.shift();
+                if (!levels[cur.depth]) levels[cur.depth] = [];
+                levels[cur.depth].push(cur);
+                if (cur.node.left) queue.push({ node: cur.node.left, depth: cur.depth + 1, parent: cur, side: 'left' });
+                if (cur.node.right) queue.push({ node: cur.node.right, depth: cur.depth + 1, parent: cur, side: 'right' });
+            }
+            return levels;
+        }
+
+        function drawMergeTreeDiagram(type) {
+            if (state.activeTab !== 'sorting' || type !== 'merge') return;
+            const canvas = document.getElementById('mergeTreeCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const nums = getSortInputValues('merge');
+            if (!nums.length) return;
+
+            const root = buildMergeDiagramTree(nums);
+            const levels = collectMergeLevels(root);
+            const hPad = 32;
+            const vGap = 52;
+            const positions = new Map();
+            const cellH = 24;
+            const fontSize = 12;
+
+            const nodeRectTop = new Map();
+            const nodeRectMerge = new Map();
+            const itemByNode = new Map(levels.flat().map(it => [it.node, it]));
+
+            const drawArrow = (x1, y1, x2, y2) => {
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.strokeStyle = '#111827';
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+
+                // arrow head
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const headLen = 7;
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2 - headLen * Math.cos(angle - Math.PI / 7), y2 - headLen * Math.sin(angle - Math.PI / 7));
+                ctx.lineTo(x2 - headLen * Math.cos(angle + Math.PI / 7), y2 - headLen * Math.sin(angle + Math.PI / 7));
+                ctx.closePath();
+                ctx.fillStyle = '#111827';
+                ctx.fill();
+            };
+
+            const drawCellGroup = (x, y, values, isFinal = false) => {
+                const labels = values.map(v => String(v));
+                ctx.font = `${fontSize}px Inter`;
+                const widths = labels.map(t => Math.max(24, Math.ceil(ctx.measureText(t).width + 12)));
+                const w = widths.reduce((s, n) => s + n, 0);
+                const h = cellH;
+                const left = x - w / 2;
+                const top = y - h / 2;
+
+                ctx.beginPath();
+                ctx.rect(left, top, w, h);
+                ctx.fillStyle = '#ffffff';
+                ctx.fill();
+                ctx.strokeStyle = isFinal ? '#0f766e' : '#111827';
+                ctx.lineWidth = isFinal ? 1.8 : 1.2;
+                ctx.stroke();
+
+                let cx = left;
+                labels.forEach((label, i) => {
+                    const cw = widths[i];
+                    if (i > 0) {
+                        ctx.beginPath();
+                        ctx.moveTo(cx, top);
+                        ctx.lineTo(cx, top + h);
+                        ctx.strokeStyle = '#111827';
+                        ctx.lineWidth = 1;
+                        ctx.stroke();
+                    }
+                    ctx.fillStyle = '#111827';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(label, cx + cw / 2, y + 0.5);
+                    cx += cw;
+                });
+
+                return { x, y, w, h, left, top, right: left + w, bottom: top + h };
+            };
+            const drawInlineLabel = (text, x, y) => {
+                ctx.font = `${fontSize}px Inter`;
+                const padX = 5;
+                const padY = 2;
+                const tw = ctx.measureText(text).width;
+                const w = tw + padX * 2;
+                const h = fontSize + padY * 2;
+                ctx.beginPath();
+                ctx.rect(x - w / 2, y - h / 2, w, h);
+                ctx.fillStyle = 'rgba(255,255,255,0.95)';
+                ctx.fill();
+                ctx.fillStyle = '#111827';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(text, x, y + 0.5);
+            };
+
+            // Tree layout: leaves are evenly spaced, internal nodes centered by children.
+            const leafItems = [];
+            const collectLeafItems = (node) => {
+                if (!node) return;
+                if (!node.left && !node.right) {
+                    const it = itemByNode.get(node);
+                    if (it) leafItems.push(it);
+                    return;
+                }
+                collectLeafItems(node.left);
+                collectLeafItems(node.right);
+            };
+            collectLeafItems(root);
+            const leafStep = (canvas.width - hPad * 2) / (leafItems.length + 1);
+            leafItems.forEach((item, i) => {
+                positions.set(item, { x: hPad + leafStep * (i + 1), y: 26 + item.depth * vGap });
+            });
+            const placeNode = (node) => {
+                const item = itemByNode.get(node);
+                if (!item) return null;
+                if (positions.has(item)) return positions.get(item);
+                const leftP = node.left ? placeNode(node.left) : null;
+                const rightP = node.right ? placeNode(node.right) : null;
+                const x = leftP && rightP ? (leftP.x + rightP.x) / 2 : (leftP ? leftP.x : (rightP ? rightP.x : hPad));
+                const y = 26 + item.depth * vGap;
+                const p = { x, y };
+                positions.set(item, p);
+                return p;
+            };
+            placeNode(root);
+
+            // Draw partition nodes first (boxes)
+            levels.forEach(level => {
+                level.forEach(item => {
+                    const p = positions.get(item);
+                    const rect = drawCellGroup(p.x, p.y, item.node.arr, false);
+                    nodeRectTop.set(item.node, rect);
+                });
+            });
+
+            // Partition connectors + labels
+            levels.forEach(level => {
+                level.forEach(item => {
+                    const parentRect = nodeRectTop.get(item.node);
+                    const leftItem = levels[item.depth + 1]?.find(x => x.parent === item && x.side === 'left');
+                    const rightItem = levels[item.depth + 1]?.find(x => x.parent === item && x.side === 'right');
+                    [leftItem, rightItem].forEach(ch => {
+                        if (!ch) return;
+                        const childRect = nodeRectTop.get(ch.node);
+                        drawArrow(parentRect.x, parentRect.bottom, childRect.x, childRect.top);
+                    });
+                    if (leftItem || rightItem) {
+                        const childYs = [leftItem, rightItem].filter(Boolean).map(ch => nodeRectTop.get(ch.node).top);
+                        const labelY = Math.min(...childYs) - 8;
+                        ctx.fillStyle = '#111827';
+                        ctx.font = `${fontSize}px Inter`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('partition', parentRect.x, labelY);
+                    }
+                });
+            });
+
+            // Merge-back flow that strictly follows the partition tree structure.
+            const allItems = levels.flat();
+            const mergeInfo = new Map();
+
+            const mergeTwoSorted = (left, right) => {
+                const out = [];
+                let i = 0;
+                let j = 0;
+                while (i < left.length && j < right.length) {
+                    if (left[i] <= right[j]) out.push(left[i++]);
+                    else out.push(right[j++]);
+                }
+                while (i < left.length) out.push(left[i++]);
+                while (j < right.length) out.push(right[j++]);
+                return out;
+            };
+
+            const computeMergeInfo = (node) => {
+                if (!node) return { values: [], level: 0 };
+                if (!node.left && !node.right) {
+                    const leafValues = node.arr && node.arr.length ? node.arr.slice() : [];
+                    mergeInfo.set(node, { values: leafValues, level: 0 });
+                    return { values: leafValues, level: 0 };
+                }
+                const left = computeMergeInfo(node.left);
+                const right = computeMergeInfo(node.right);
+                const merged = mergeTwoSorted(left.values, right.values);
+                const level = Math.max(left.level, right.level) + 1;
+                mergeInfo.set(node, { values: merged, level });
+                return { values: merged, level };
+            };
+
+            const rootMerge = computeMergeInfo(root);
+            if (!rootMerge.level) return;
+
+            const mergeTopY = 26 + levels.length * vGap + 14;
+            const mergeGapY = 44;
+            const mergePos = new Map();
+            const drawMergeNode = (node) => {
+                const info = mergeInfo.get(node);
+                if (!info) return null;
+                if (info.level === 0) return nodeRectTop.get(node) || null;
+                if (mergePos.has(node)) return mergePos.get(node);
+
+                const leftRect = node.left ? drawMergeNode(node.left) : null;
+                const rightRect = node.right ? drawMergeNode(node.right) : null;
+                if (!leftRect && !rightRect) return null;
+
+                const lx = leftRect ? leftRect.x : rightRect.x;
+                const rx = rightRect ? rightRect.x : leftRect.x;
+                const x = (lx + rx) / 2;
+                const y = mergeTopY + (info.level - 1) * mergeGapY;
+
+                const rect = drawCellGroup(x, y, info.values, node === root);
+                mergePos.set(node, rect);
+                nodeRectMerge.set(node, rect);
+
+                [leftRect, rightRect].filter(Boolean).forEach(childRect => {
+                    drawArrow(childRect.x, childRect.bottom, rect.x, rect.top);
+                });
+                drawInlineLabel('merge', rect.x, rect.top - 12);
+                return rect;
+            };
+
+            drawMergeNode(root);
+        }
+
+        function renderRadixPassTables() {
+            const host = document.getElementById('radix-pass-tables');
+            const s = state.sortStates.radix;
+            if (!host || !s || !s.steps) return;
+            const passSteps = s.steps.filter(st => st.radixPass);
+            if (!passSteps.length) { host.innerHTML = ''; return; }
+            const shownPasses = passSteps.slice(0, 3);
+            const activePass = Math.min(s.index, passSteps.length) > 0 ? passSteps[Math.min(s.index, passSteps.length) - 1].radixPass : 0;
+            host.innerHTML = shownPasses.map(pass => {
+                const isActive = pass.radixPass === activePass;
+                const digitName = pass.exp === 1 ? 'Units (LSD)' : pass.exp === 10 ? 'Tens' : pass.exp === 100 ? 'Hundreds' : `10^${Math.log10(pass.exp)}`;
+                const rows = pass.buckets.map((bucket, d) =>
+                    `<tr><td class="border border-slate-200 px-2 py-1 font-semibold">${d}</td><td class="border border-slate-200 px-2 py-1">${bucket.length ? bucket.join(', ') : '-'}</td></tr>`
+                ).join('');
+                return `
+                <div class="rounded-lg border ${isActive ? 'border-teal-300 bg-teal-50/60' : 'border-slate-200 bg-white'} p-3">
+                    <p class="text-xs font-bold ${isActive ? 'text-teal-700' : 'text-slate-700'} mb-2">Pass ${pass.radixPass} - ${digitName}</p>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-[11px] border-collapse">
+                            <thead><tr><th class="border border-slate-200 px-2 py-1 bg-slate-50">Bucket</th><th class="border border-slate-200 px-2 py-1 bg-slate-50">Values</th></tr></thead>
+                            <tbody>${rows}</tbody>
+                        </table>
+                    </div>
+                    <p class="text-[11px] text-slate-600 mt-2"><strong>Grouped result:</strong> ${pass.array.join(', ')}</p>
+                </div>`;
+            }).join('');
+        }
+
+        function renderSortingVisualizers() {
+            if (state.activeTab !== 'sorting') return;
+            ['bubble', 'selection', 'merge', 'radix'].forEach(type => {
+                if (!state.sortStates[type]) sortInit(type);
+                renderSortingVisualizer(type);
+            });
+        }
+
+        function applyPostfixOp(a, b, op) {
+            if (op === '+') return a + b;
+            if (op === '-') return a - b;
+            if (op === '*') return a * b;
+            if (op === '/') return b === 0 ? NaN : a / b;
+            if (op === '^') return Math.pow(a, b);
+            throw new Error(`Unsupported operator: ${op}`);
+        }
+
+        function buildPostfixSteps(expression) {
+            const tokens = expression.trim().split(/\s+/).filter(Boolean);
+            const steps = [];
+            const stack = [];
+            const ops = new Set(['+', '-', '*', '/', '^']);
+            tokens.forEach((token, idx) => {
+                if (!ops.has(token)) {
+                    const num = parseFloat(token);
+                    if (Number.isNaN(num)) throw new Error(`Invalid token "${token}"`);
+                    stack.push(num);
+                    steps.push({
+                        step: idx + 1,
+                        token,
+                        action: 'Push',
+                        calc: '-',
+                        stack: stack.slice()
+                    });
+                } else {
+                    if (stack.length < 2) throw new Error(`Not enough operands for "${token}"`);
+                    const b = stack.pop();
+                    const a = stack.pop();
+                    const result = applyPostfixOp(a, b, token);
+                    stack.push(result);
+                    steps.push({
+                        step: idx + 1,
+                        token,
+                        action: 'Pop 2, Eval, Push',
+                        calc: `${a} ${token} ${b} = ${Number.isFinite(result) ? result : 'NaN'}`,
+                        stack: stack.slice()
+                    });
+                }
+            });
+            if (stack.length !== 1) throw new Error('Expression did not resolve to a single result.');
+            return steps;
+        }
+
+        function renderPostfix() {
+            if (state.activeTab !== 'spanning') return;
+            const body = document.getElementById('postfix-steps-body');
+            const wrap = document.getElementById('postfix-stack-wrap');
+            if (!body || !wrap) return;
+            const currentIndex = state.postfixState.index;
+            const steps = state.postfixState.steps;
+            body.innerHTML = '';
+            for (let i = 0; i < currentIndex; i++) {
+                const s = steps[i];
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td class="py-1">${s.step}</td><td class="py-1 font-bold">${s.token}</td><td class="py-1">${s.action}</td><td class="py-1">[${s.stack.map(v => Number(v.toFixed(4))).join(', ')}]</td><td class="py-1">${s.calc}</td>`;
+                if (s.action !== 'Push') tr.className = 'bg-teal-50 text-teal-800';
+                body.appendChild(tr);
+            }
+            const stack = currentIndex > 0 ? steps[currentIndex - 1].stack : [];
+            wrap.innerHTML = '';
+            if (!stack.length) return;
+            const max = Math.max(...stack.map(v => Math.abs(v)), 1);
+            stack.forEach((v, idx) => {
+                const col = document.createElement('div');
+                col.className = 'sort-3d-col';
+                if (idx === stack.length - 1) col.classList.add('active');
+                col.style.height = `${Math.max(26, (Math.abs(v) / max) * 170)}px`;
+                const label = document.createElement('span');
+                label.className = 'val';
+                label.innerText = String(Number(v.toFixed(2)));
+                col.appendChild(label);
+                wrap.appendChild(col);
+            });
+        }
+
+        function postfixInit() {
+            postfixPause();
+            const input = document.getElementById('postfix-input');
+            const status = document.getElementById('postfix-status');
+            if (!input || !status) return;
+            try {
+                const steps = buildPostfixSteps(input.value);
+                state.postfixState = { steps, index: 0 };
+                status.innerText = `Initialized ${steps.length} token steps.`;
+                status.className = 'text-xs text-slate-500 mb-3';
+                renderPostfix();
+            } catch (err) {
+                state.postfixState = { steps: [], index: 0 };
+                status.innerText = err.message;
+                status.className = 'text-xs text-red-600 mb-3';
+                renderPostfix();
+            }
+        }
+
+        function postfixStep() {
+            const status = document.getElementById('postfix-status');
+            const s = state.postfixState;
+            if (!s.steps.length) return postfixInit();
+            s.index = Math.min(s.index + 1, s.steps.length);
+            if (status) {
+                status.innerText = s.index >= s.steps.length
+                    ? `Done. Result = ${Number(s.steps[s.steps.length - 1].stack[0].toFixed(4))}`
+                    : `Step ${s.index}/${s.steps.length}`;
+            }
+            renderPostfix();
+            if (s.index >= s.steps.length) postfixPause();
+        }
+
+        function postfixPlay() {
+            postfixPause();
+            state.postfixTimer = setInterval(() => {
+                if (state.postfixState.index >= state.postfixState.steps.length) { postfixPause(); return; }
+                postfixStep();
+            }, 500);
+        }
+
+        function postfixPause() {
+            clearInterval(state.postfixTimer);
+            state.postfixTimer = null;
+        }
+
         function initSpotlightCards() {
             document.querySelectorAll('[data-spotlight]').forEach(card => {
                 card.addEventListener('mousemove', (event) => {
@@ -2311,7 +3054,7 @@
 
         // Init
         window.addEventListener('DOMContentLoaded', () => {
-            updateStackUI(); updateQueueUI(); initSpotlightCards(); resetExpressionTree(); generateExpressionTree(); switchTab('foundations');
+            updateStackUI(); updateQueueUI(); initSpotlightCards(); resetExpressionTree(); generateExpressionTree(); postfixInit(); switchTab('foundations');
         });
 
     </script>
